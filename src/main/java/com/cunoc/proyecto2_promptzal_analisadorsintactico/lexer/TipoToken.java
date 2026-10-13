@@ -10,11 +10,26 @@ package com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer;
  */
 public enum TipoToken {
     DIRECTIVA,
-    AGENTE, CONTEXTO, VARIABLE, EJECUTAR, EXPORTAR,
-    COMANDO_IA, CARGAR,
-    CONECTOR, FLECHA,
-    IGUAL, MAS,
-    LLAVE_A, LLAVE_C, PAR_A, PAR_C, COMA,
-    ID, CADENA, NUMERO,
+    AGENTE, 
+    CONTEXTO, 
+    VARIABLE, 
+    EJECUTAR, 
+    EXPORTAR,
+    COMANDO_IA, 
+    CARGAR,
+    CONECTOR, 
+    
+    FLECHA,
+    IGUAL, 
+    MAS,
+    LLAVE_A, 
+    LLAVE_C, 
+    PAR_A, 
+    PAR_C, 
+    COMA,
+    
+    ID, 
+    CADENA, 
+    NUMERO,
     EOF
 }
