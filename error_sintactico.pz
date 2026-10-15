@@ -1,0 +1,13 @@
+@modelo "claude"
+@rol
+AGENTE uno {
+ contexto = "a"
+ variable x =
+ RESUMIR x -> y
+ PREGUNTAR "hola" SOBRE -> z
+}
+AGENTE dos {
+ RESUMIR "texto" -> r
+}
+EJECUTAR uno
+EXPORTAR r

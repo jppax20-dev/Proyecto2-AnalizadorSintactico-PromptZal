@@ -26,7 +26,7 @@ public class Comando {
         this.filaDestino = filaDestino;        
     }
     
-    public String getNomnbre(){ return nombre;}
+    public String getNombre(){ return nombre;}
     public Expresion getArgumento(){ return argumento;}
     public List<Conector> getConectores(){return conectores;}
     public String getDestino (){return destino; }
