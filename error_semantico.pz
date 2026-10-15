@@ -1,0 +1,15 @@
+@modelo "claude"
+AGENTE a {
+ contexto = "x"
+ variable v = z
+ GENERAR codigo DESDE v -> c
+ RESUMIR c EN 50 palabras -> r
+ RESUMIR q -> s
+}
+AGENTE a {
+ contexto = "y"
+ RESUMIR "t" -> r2
+}
+EJECUTAR a
+EJECUTAR b
+EXPORTAR r, nada
