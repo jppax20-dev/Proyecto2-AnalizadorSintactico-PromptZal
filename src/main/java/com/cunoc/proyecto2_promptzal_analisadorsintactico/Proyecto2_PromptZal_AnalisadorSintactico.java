@@ -10,6 +10,7 @@ import com.cunoc.proyecto2_promptzal_analisadorsintactico.generador.GeneradorPro
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.AnalizadorLexico;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.parser.Parser;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteErrores;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.AnalizadorSemantico;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.Simbolo;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.TablaSimbolos;
@@ -22,7 +23,7 @@ public class Proyecto2_PromptZal_AnalisadorSintactico {
 
             public static void main(String[] args) throws Exception {
         AnalizadorLexico lexico = new AnalizadorLexico();
-        lexico.analizar(Files.readString(Path.of(args.length > 0 ? args[0] : "error_semantico.pz")));
+        lexico.analizar(Files.readString(Path.of(args.length > 0 ? args[0] : "ejemplo.pz")));
 
         List<ErrorCompilacion> errores = new ArrayList<>(lexico.getErrores());
         Programa programa = new Parser(lexico.getTokens(), errores).parsear();
@@ -35,5 +36,6 @@ public class Proyecto2_PromptZal_AnalisadorSintactico {
             System.out.println(s.getNombre() + "  " + s.getTipo() + "  " + s.getAmbito() + "  " + s.getFila());
         }
         System.out.println(new GeneradorPromptzal().generar(programa));
+        Files.writeString(Path.of("reporte_errores.html"), new ReporteErrores().generar(errores));
     }
 }
