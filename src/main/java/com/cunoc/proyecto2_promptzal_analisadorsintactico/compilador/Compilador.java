@@ -8,6 +8,7 @@ import com.cunoc.proyecto2_promptzal_analisadorsintactico.parser.Parser;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.AnalizadorSemantico;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.TablaSimbolos;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Compilador {
@@ -20,6 +21,9 @@ public class Compilador {
         Programa programa = new Parser(lexico.getTokens(), errores).parsear();
         TablaSimbolos tabla = new AnalizadorSemantico(errores).analizar(programa);
         String promptzal = new GeneradorPromptzal().generar(programa);
+        
+        errores.sort(Comparator.comparingInt(ErrorCompilacion::getFila)
+        .thenComparingInt(ErrorCompilacion::getColumna));
 
         return new ResultadoCompilacion(lexico.getTokens(), errores, programa, tabla, promptzal);
     }
