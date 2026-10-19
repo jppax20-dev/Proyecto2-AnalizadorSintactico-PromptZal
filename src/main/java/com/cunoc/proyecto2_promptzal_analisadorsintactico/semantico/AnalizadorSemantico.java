@@ -42,7 +42,7 @@ public class AnalizadorSemantico {
         String nombre = agente.getNombre();
         if (nombre == null) return;
         if (tabla.existeAgente(nombre)) {
-            errores.add(ErrorCompilacion.semantico("Agente duplicado: '" + nombre + "'", agente.getFila()));
+            errores.add(ErrorCompilacion.semantico("Agente duplicado: '" + nombre + "'", agente.getFila(), agente.getColumna()));
             return;
         }
         tabla.agregar(new Simbolo(nombre, TipoSimbolo.AGENTE, AMBITO_GLOBAL, agente.getFila()));
@@ -71,7 +71,7 @@ public class AnalizadorSemantico {
         for (int i = omitirPrimero ? 1 : 0; i < terminos.size(); i++) {
             if (terminos.get(i) instanceof TerminoId id && !tabla.existeVariable(ambito, id.getNombre())) {
                 errores.add(ErrorCompilacion.semantico("Identificador '" + id.getNombre()
-                        + "' usado sin declarar en el agente '" + ambito + "'", id.getFila()));
+                        + "' usado sin declarar en el agente '" + ambito + "'", id.getFila(), id.getColumna()));
             }
         }
     }
@@ -80,7 +80,7 @@ public class AnalizadorSemantico {
         for (Referencia r : programa.getEjecuciones()) {
             if (!tabla.existeAgente(r.getNombre())) {
                 errores.add(ErrorCompilacion.semantico(
-                        "EJECUTAR hace referencia a un agente inexistente: '" + r.getNombre() + "'", r.getFila()));
+                        "EJECUTAR hace referencia a un agente inexistente: '" + r.getNombre() + "'", r.getFila(), r.getColuma()));
             }
         }
     }
@@ -96,7 +96,7 @@ public class AnalizadorSemantico {
             }
             if (!existe) {
                 errores.add(ErrorCompilacion.semantico("EXPORTAR hace referencia a '" + r.getNombre()
-                        + "', que no existe en ningún agente ejecutado", r.getFila()));
+                        + "', que no existe en ningún agente ejecutado", r.getFila(), r.getColuma()));
             }
         }
     }

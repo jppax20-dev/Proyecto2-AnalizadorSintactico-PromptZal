@@ -11,13 +11,14 @@ package com.cunoc.proyecto2_promptzal_analisadorsintactico.ast;
 public class TerminoId extends Termino {
     
     private final String nombre;
+    private final int columna;
     
-    public TerminoId(String nombre, int fila) {
+    public TerminoId(String nombre, int fila, int columna) {
         super(fila);
         this.nombre = nombre;
+        this.columna = columna;
     }
     
-    public String getNombre(){
-        return nombre;
-    }
+    public String getNombre(){return nombre;}
+    public int getColumna(){return columna;}
 }

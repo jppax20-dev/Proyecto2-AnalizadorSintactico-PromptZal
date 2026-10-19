@@ -12,13 +12,16 @@ public class Referencia {
     
     private final String nombre;
     private final int fila;
+    private final int columna;
     
-    public Referencia(String nombre, int fila){
+    public Referencia(String nombre, int fila, int columna){
         this.nombre = nombre;
         this.fila = fila; 
+        this.columna = columna;
     }
     
     public String getNombre(){return nombre; }
     public int getFila(){return fila; }
+    public int getColuma(){return columna; }
 }
 

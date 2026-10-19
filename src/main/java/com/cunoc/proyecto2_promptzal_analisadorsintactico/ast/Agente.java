@@ -15,13 +15,15 @@ public class Agente {
     private final List<Variable> variables;
     private final List<Comando> comandos;
     private final int fila; 
+    private final int columna;
     
-    public Agente(String nombre, String contexto, List<Variable> variables, List<Comando> comandos, int fila){
+    public Agente(String nombre, String contexto, List<Variable> variables, List<Comando> comandos, int fila, int columna){
         this.nombre = nombre;
         this.contexto = contexto;
         this.variables = variables;
         this.comandos = comandos;
         this.fila = fila;
+        this.columna = columna;
     }
     
     public String getNombre(){return nombre;}
@@ -29,4 +31,5 @@ public class Agente {
     public List<Variable> getVariables(){return variables;}
     public List<Comando> getComandos(){return comandos;}
     public int getFila(){return fila; }
+    public int getColumna(){return columna; }
 }

@@ -35,8 +35,8 @@ public class ErrorCompilacion {
         return new ErrorCompilacion(Tipo.SINTACTICO, descripcion, fila, columna, encontrado, esperado);
     }
 
-    public static ErrorCompilacion semantico(String descripcion, int fila) {
-        return new ErrorCompilacion(Tipo.SEMANTICO, descripcion, fila, 0, null, null);
+        public static ErrorCompilacion semantico(String descripcion, int fila, int columna) {
+        return new ErrorCompilacion(Tipo.SEMANTICO, descripcion, fila, columna, null, null);
     }
 
     public Tipo getTipo() { return tipo; }

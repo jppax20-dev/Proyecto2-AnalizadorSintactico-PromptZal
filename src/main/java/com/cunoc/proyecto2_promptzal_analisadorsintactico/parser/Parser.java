@@ -117,7 +117,7 @@ public class Parser {
                 return new TerminoCadena(sinComillas(t.getLexema()), t.getFila());
             case ID:
                 avanzar();
-                return new TerminoId(t.getLexema(), t.getFila());
+                return new TerminoId(t.getLexema(), t.getFila(), t.getColumna());
             case NUMERO:
                 avanzar();
                 return new TerminoNumero(t.getLexema(), unidad(), t.getFila());
@@ -283,7 +283,7 @@ public class Parser {
         List<Variable> variables = variables();
         List<Comando> comandos = comandos();
         cerrarAgente(comandos);
-        return new Agente(nombre, contexto, variables, comandos, inicio.getFila());
+        return new Agente(nombre, contexto, variables, comandos, inicio.getFila(), inicio.getColumna());
     }
 
     private void cerrarAgente(List<Comando> comandos) {
@@ -326,7 +326,7 @@ public class Parser {
         try {
             match(TipoToken.EJECUTAR);
             Token id = match(TipoToken.ID);
-            lista.add(new Referencia(id.getLexema(), id.getFila()));
+            lista.add(new Referencia(id.getLexema(), id.getFila(), id.getColumna()));
         } catch (ErrorSintactico e) {
             sincronizarPrograma();
         }
@@ -338,7 +338,7 @@ public class Parser {
         try {
             match(TipoToken.EXPORTAR);
             Token id = match(TipoToken.ID);
-            lista.add(new Referencia(id.getLexema(), id.getFila()));
+            lista.add(new Referencia(id.getLexema(), id.getFila(), id.getColumna()));
             masIds(lista);
         } catch (ErrorSintactico e) {
             sincronizarPrograma();
@@ -351,7 +351,7 @@ public class Parser {
         while (verifica(TipoToken.COMA)) {
             avanzar();
             Token id = match(TipoToken.ID);
-            lista.add(new Referencia(id.getLexema(), id.getFila()));
+            lista.add(new Referencia(id.getLexema(), id.getFila(), id.getColumna()));
         }
     }
 }
