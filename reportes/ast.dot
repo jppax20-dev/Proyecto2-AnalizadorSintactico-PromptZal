@@ -1,0 +1,33 @@
+digraph AST {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#f8f9fa", color="#343a40"];
+  edge [color="#adb5bd", dir=none];
+
+  n0 [label="Programa", fillcolor="#2c3e50", fontcolor=white];
+  n1 [label="@modelo = 'claude-sonnet-4-6'"];
+  n0 -> n1;
+  n2 [label="Agente: traductor\nLínea: 3", fillcolor="#d35400", fontcolor=white];
+  n0 -> n2;
+  n3 [label="Contexto: 'Eres un traductor profesional'"];
+  n2 -> n3;
+  n4 [label="Var: texto\nLínea: 5", fillcolor="#27ae60", fontcolor=white];
+  n2 -> n4;
+  n5 [label="\"Hola mundo, bienvenidos al laboratorio\""];
+  n4 -> n5;
+  n6 [label="TRADUCIR\nLínea: 7", fillcolor="#2980b9", fontcolor=white];
+  n2 -> n6;
+  n7 [label="Argumento", fillcolor="#8e44ad", fontcolor=white];
+  n6 -> n7;
+  n8 [label="texto"];
+  n7 -> n8;
+  n9 [label="EN", fillcolor="#8e44ad", fontcolor=white];
+  n6 -> n9;
+  n10 [label="\"ingles\""];
+  n9 -> n10;
+  n11 [label="-> resultado"];
+  n6 -> n11;
+  n12 [label="Ejecutar: traductor"];
+  n0 -> n12;
+  n13 [label="Exportar: resultado"];
+  n0 -> n13;
+}

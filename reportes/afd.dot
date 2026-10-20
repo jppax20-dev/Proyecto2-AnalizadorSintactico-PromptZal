@@ -1,0 +1,68 @@
+digraph AFD {
+  rankdir=LR;
+  graph [label="L = letra o _     D = dígito     Punteado rojo = error     Gris = se descarta", labelloc=b, fontname="Helvetica"];
+  node [shape=circle, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10];
+
+  inicio [shape=point];
+  inicio -> q0;
+
+  q0 [label="q0"];
+  ID [label="ID /\nreservada", shape=doublecircle];
+  ENT [label="NUMERO\nentero", shape=doublecircle];
+  PUNTO [label="."];
+  DEC [label="NUMERO\ndecimal", shape=doublecircle];
+  ABIERTA [label="cadena\nabierta", shape=doublecircle, style=dashed, color=red];
+  CADENA [label="CADENA", shape=doublecircle];
+  ARROBA [label="@", shape=doublecircle, style=dashed, color=red];
+  DIR [label="DIRECTIVA", shape=doublecircle];
+  GUION [label="-", shape=doublecircle, style=dashed, color=red];
+  FLECHA [label="FLECHA", shape=doublecircle];
+  BARRA [label="/", shape=doublecircle, style=dashed, color=red];
+  COM_L [label="comentario\nde línea", shape=doublecircle, style=filled, fillcolor="#e9ecef"];
+  COM_B [label="/* ..."];
+  COM_AST [label="/* ... *"];
+  COM_FIN [label="comentario\nde bloque", shape=doublecircle, style=filled, fillcolor="#e9ecef"];
+  IGUAL [label="IGUAL", shape=doublecircle];
+  MAS [label="MAS", shape=doublecircle];
+  LLAVE_A [label="LLAVE_A", shape=doublecircle];
+  LLAVE_C [label="LLAVE_C", shape=doublecircle];
+  PAR_A [label="PAR_A", shape=doublecircle];
+  PAR_C [label="PAR_C", shape=doublecircle];
+  COMA [label="COMA", shape=doublecircle];
+  ERR [label="error", shape=doublecircle, style=dashed, color=red];
+
+  q0 -> q0 [label="espacio, tab,\nsalto de línea"];
+  q0 -> ID [label="L"];
+  ID -> ID [label="L, D"];
+  q0 -> ENT [label="D"];
+  ENT -> ENT [label="D"];
+  ENT -> PUNTO [label="."];
+  PUNTO -> DEC [label="D"];
+  DEC -> DEC [label="D"];
+  q0 -> ABIERTA [label="\""];
+  ABIERTA -> ABIERTA [label="todo menos\n\" y salto de línea"];
+  ABIERTA -> CADENA [label="\""];
+  q0 -> ARROBA [label="@"];
+  ARROBA -> DIR [label="L"];
+  DIR -> DIR [label="L"];
+  q0 -> GUION [label="-"];
+  GUION -> FLECHA [label=">"];
+  q0 -> BARRA [label="/"];
+  BARRA -> COM_L [label="/"];
+  COM_L -> COM_L [label="todo menos\nsalto de línea"];
+  BARRA -> COM_B [label="*"];
+  COM_B -> COM_B [label="todo menos *"];
+  COM_B -> COM_AST [label="*"];
+  COM_AST -> COM_AST [label="*"];
+  COM_AST -> COM_B [label="todo menos * y /"];
+  COM_AST -> COM_FIN [label="/"];
+  q0 -> IGUAL [label="="];
+  q0 -> MAS [label="+"];
+  q0 -> LLAVE_A [label="{"];
+  q0 -> LLAVE_C [label="}"];
+  q0 -> PAR_A [label="("];
+  q0 -> PAR_C [label=")"];
+  q0 -> COMA [label=","];
+  q0 -> ERR [label="cualquier\notro"];
+}

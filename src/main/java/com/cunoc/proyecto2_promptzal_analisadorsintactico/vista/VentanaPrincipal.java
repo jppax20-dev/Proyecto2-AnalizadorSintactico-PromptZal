@@ -1,8 +1,13 @@
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.vista;
 
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.AfdPromptZal;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.GeneradorDotAfd;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.compilador.Compilador;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.compilador.ResultadoCompilacion;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.errores.ErrorCompilacion;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.graphviz.GeneradorDotAst;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.graphviz.MostrarGraphviz;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteAst;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteErrores;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteSimbolos;
@@ -23,6 +28,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.util.List;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -58,9 +64,6 @@ public class VentanaPrincipal extends JFrame {
         panelPrompt.setEditable(false);
         panelErrores.setEditable(false);
 
-        pestanas.addTab("Promptzal", new JScrollPane(panelPrompt));
-        pestanas.addTab("Errores", new JScrollPane(panelErrores));
-
         JSplitPane division = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(editor), pestanas);
         division.setResizeWeight(0.6);
 
@@ -70,6 +73,7 @@ public class VentanaPrincipal extends JFrame {
         barra.add(boton("Compilar", this::compilar));
         barra.add(boton("Guardar promptzal", this::guardarPrompt));
         barra.add(boton("Reportes", this::generarReportes));
+        barra.add(boton("AFD", this::generarAfd));
 
         add(barra, BorderLayout.NORTH);
         add(division, BorderLayout.CENTER);
@@ -115,12 +119,31 @@ public class VentanaPrincipal extends JFrame {
             sb.append(e.getTipo()).append(" [").append(e.getFila()).append(':')
                     .append(e.getColumna()).append("] ").append(e.getDescripcion()).append('\n');
         }
-        panelErrores.setText(sb.length() == 0 ? "Sin errores." : sb.toString());
+        panelErrores.setText(textoErrores(ultimo.getErrores()));
         pestanas.setTitleAt(1, "Errores (" + ultimo.getErrores().size() + ")");
         panelPrompt.setCaretPosition(0);
         panelErrores.setCaretPosition(0);
+
+        StringBuilder tokens = new StringBuilder(String.format("%-14s %-32s %s%n", "TIPO", "LEXEMA", "FILA:COL"));
+        for (Token t : ultimo.getTokens()) {
+            tokens.append(String.format("%-14s %-32s %d:%d%n", t.getTipo(), t.getLexema(), t.getFila(), t.getColumna()));
+        }
+        panelTokens.setText(tokens.toString());
+        pestanas.setTitleAt(2, "Tokens (" + ultimo.getTokens().size() + ")");
+        panelTokens.setCaretPosition(0);
         
-        
+        GeneradorDotAst generadorAst = new GeneradorDotAst();
+        String codigoDot = generadorAst.generarCodigo(ultimo.getPrograma());
+
+        try {
+            new MostrarGraphviz().compilarImagen(
+            new GeneradorDotAst().generarCodigo(ultimo.getPrograma()),
+            Path.of("reportes/ast.dot"), Path.of("reportes/ast.png"));
+        } catch (IOException ex) {
+            mensaje("No se pudo generar la imagen del AST:\n" + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void guardarPrompt() {
@@ -178,5 +201,39 @@ public class VentanaPrincipal extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new VentanaPrincipal().setVisible(true));
+    }
+    
+    private String textoErrores(List<ErrorCompilacion> errores) {
+        if (errores.isEmpty()) return "Sin errores.";
+        StringBuilder sb = new StringBuilder();
+        seccion(sb, "ERRORES LÉXICOS", errores, ErrorCompilacion.Tipo.LEXICO);
+        seccion(sb, "ERRORES SINTÁCTICOS", errores, ErrorCompilacion.Tipo.SINTACTICO);
+        seccion(sb, "ERRORES SEMÁNTICOS", errores, ErrorCompilacion.Tipo.SEMANTICO);
+        return sb.toString();
+    }
+
+    private void seccion(StringBuilder sb, String titulo, List<ErrorCompilacion> errores,
+                         ErrorCompilacion.Tipo tipo) {
+        List<ErrorCompilacion> delTipo = errores.stream().filter(e -> e.getTipo() == tipo).toList();
+        if (delTipo.isEmpty()) return;
+        if (sb.length() > 0) sb.append('\n');
+        sb.append(titulo).append(" (").append(delTipo.size()).append(")\n");
+        for (ErrorCompilacion e : delTipo) {
+            sb.append("  [").append(e.getFila()).append(':').append(e.getColumna()).append("] ")
+                    .append(e.getDescripcion()).append('\n');
+        }
+    }
+    
+        private void generarAfd() {
+        try {
+            new MostrarGraphviz().compilarImagen(
+                    new GeneradorDotAfd().generar(AfdPromptZal.construir()),
+                    Path.of("reportes/afd.dot"), Path.of("reportes/afd.png"));
+            mensaje("AFD generado en reportes/afd.png");
+        } catch (IOException ex) {
+            mensaje("No se pudo generar el AFD:\n" + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
