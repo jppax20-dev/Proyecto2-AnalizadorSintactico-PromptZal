@@ -1,0 +1,10 @@
+@modelo "claude"
+AGENTE a {
+ contexto = "x"
+ variable v = z
+ RESUMIR v -> r
+ PREGUNTAR "hola" SOBRE -> q
+ RESUMIR # -> s
+}
+EJECUTAR a
+EXPORTAR r, nada

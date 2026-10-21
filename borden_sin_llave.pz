@@ -1,0 +1,10 @@
+AGENTE a {
+ contexto = "c"
+ RESUMIR "uno" -> r1
+AGENTE b {
+ contexto = "d"
+ RESUMIR "dos" -> r2
+}
+EJECUTAR a
+EJECUTAR b
+EXPORTAR r1, r2

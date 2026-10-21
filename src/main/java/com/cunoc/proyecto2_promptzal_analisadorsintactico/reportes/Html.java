@@ -1,15 +1,180 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes;
 
-/**
- *
- * @author jppax
- */
 final class Html {
-    
+
+    private static final String ESTILO = """
+            :root {
+              --fondo: #0a0d14;
+              --panel: #111827;
+              --panel2: #172033;
+              --borde: #243049;
+              --texto: #dbe4ff;
+              --tenue: #8393b8;
+              --cian: #00e5ff;
+              --verde: #39ff88;
+              --magenta: #ff3d9a;
+              --ambar: #ffb300;
+              --violeta: #b07cff;
+            }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              min-height: 100vh;
+              color: var(--texto);
+              background: radial-gradient(ellipse at top, #16213d 0%, var(--fondo) 60%) fixed;
+              font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            }
+            header {
+              padding: 28px 24px 22px;
+              border-bottom: 1px solid var(--cian);
+              box-shadow: 0 6px 24px rgba(0, 229, 255, 0.18);
+              background: linear-gradient(90deg, rgba(0, 229, 255, 0.08), rgba(255, 61, 154, 0.08));
+            }
+            .marca {
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 0.8rem;
+              letter-spacing: 0.4em;
+              color: var(--magenta);
+              text-shadow: 0 0 8px var(--magenta);
+            }
+            h1 {
+              margin: 6px 0 0;
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 2rem;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #ffffff;
+              text-shadow: 0 0 12px var(--cian);
+            }
+            main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 40px; }
+            .total { --acento: var(--cian); }
+            .lexico { --acento: var(--ambar); }
+            .sintactico { --acento: var(--magenta); }
+            .semantico { --acento: var(--violeta); }
+            .agente { --acento: var(--cian); }
+            .variable { --acento: var(--verde); }
+            .resultado { --acento: var(--ambar); }
+            .hud {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+              gap: 16px;
+            }
+            .carta {
+              background: var(--panel);
+              border: 1px solid var(--borde);
+              border-left: 4px solid var(--acento, var(--cian));
+              border-radius: 8px;
+              padding: 14px 18px;
+              box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+            }
+            .carta .valor {
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 2.2rem;
+              font-weight: bold;
+              color: var(--acento, var(--cian));
+              text-shadow: 0 0 10px var(--acento, var(--cian));
+            }
+            .carta .etiqueta {
+              font-size: 0.75rem;
+              letter-spacing: 0.15em;
+              text-transform: uppercase;
+              color: var(--tenue);
+            }
+            .bloque { margin-top: 32px; }
+            .bloque h2 {
+              margin: 0 0 12px;
+              padding-left: 12px;
+              border-left: 4px solid var(--acento, var(--cian));
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 1.1rem;
+              letter-spacing: 0.12em;
+              text-transform: uppercase;
+              color: var(--acento, var(--cian));
+              text-shadow: 0 0 8px var(--acento, var(--cian));
+            }
+            .cuenta {
+              margin-left: 8px;
+              padding: 1px 10px;
+              border: 1px solid var(--acento, var(--cian));
+              border-radius: 999px;
+              font-size: 0.85rem;
+            }
+            .tabla {
+              overflow-x: auto;
+              border: 1px solid var(--borde);
+              border-radius: 8px;
+              box-shadow: 0 0 18px rgba(0, 0, 0, 0.4);
+            }
+            table { width: 100%; border-collapse: collapse; background: var(--panel); }
+            th {
+              padding: 10px 14px;
+              text-align: left;
+              font-size: 0.72rem;
+              letter-spacing: 0.14em;
+              text-transform: uppercase;
+              color: var(--tenue);
+              background: var(--panel2);
+              border-bottom: 1px solid var(--acento, var(--cian));
+            }
+            td { padding: 10px 14px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+            tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+            tr:hover td { background: rgba(0, 229, 255, 0.07); }
+            tr:last-child td { border-bottom: none; }
+            td.pos { font-family: Consolas, 'Courier New', monospace; color: var(--cian); white-space: nowrap; }
+            td.codigo { font-family: Consolas, 'Courier New', monospace; color: var(--verde); }
+            td.token { white-space: nowrap; }
+            .insignia {
+              display: inline-block;
+              padding: 2px 10px;
+              border: 1px solid var(--acento, var(--cian));
+              border-radius: 999px;
+              color: var(--acento, var(--cian));
+              background: rgba(255, 255, 255, 0.03);
+              font-size: 0.72rem;
+              letter-spacing: 0.1em;
+              text-transform: uppercase;
+              white-space: nowrap;
+            }
+            .ok {
+              margin-top: 28px;
+              padding: 28px;
+              text-align: center;
+              border: 1px solid var(--verde);
+              border-radius: 10px;
+              background: rgba(57, 255, 136, 0.06);
+              box-shadow: 0 0 24px rgba(57, 255, 136, 0.25);
+            }
+            .ok .titulo {
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 1.8rem;
+              letter-spacing: 0.2em;
+              color: var(--verde);
+              text-shadow: 0 0 14px var(--verde);
+            }
+            .ok p { margin: 8px 0 0; color: var(--tenue); }
+            .vacio { margin: 0; padding: 8px 0; color: var(--tenue); font-style: italic; }
+            pre {
+              padding: 18px;
+              overflow-x: auto;
+              background: var(--panel);
+              border: 1px solid var(--borde);
+              border-radius: 8px;
+              color: var(--verde);
+              font-family: Consolas, 'Courier New', monospace;
+              font-size: 0.95rem;
+              line-height: 1.5;
+            }
+            footer {
+              padding: 24px;
+              text-align: center;
+              color: var(--tenue);
+              font-size: 0.8rem;
+              letter-spacing: 0.1em;
+            }
+                                         
+            .cabecera { max-width: 1100px; margin: 0 auto; }
+            """;
+
     private Html() {
     }
 
@@ -25,35 +190,38 @@ final class Html {
         return "<td>" + escapar(texto) + "</td>";
     }
 
-    static String pagina(String titulo, String cuerpo) {
-        return """
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                <meta charset="UTF-8">
-                <title>%s</title>
-                <style>
-                %s
-                </style>
-                </head>
-                <body>
-                <header><h1>%s</h1></header>
-                <main>
-                %s
-                </main>
-                </body>
-                </html>
-                """.formatted(escapar(titulo), ESTILO, escapar(titulo), cuerpo);
+    static String celdaPos(String texto) {
+        return "<td class=\"pos\">" + escapar(texto) + "</td>";
     }
-        private static final String ESTILO = """
-            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
-            header { background: #1f3a5f; color: #fff; padding: 1rem 2rem; }
-            header h1 { margin: 0; font-size: 1.4rem; }
-            main { padding: 1.5rem 2rem; }
-            table { border-collapse: collapse; width: 100%%; background: #fff; }
-            th, td { border: 1px solid #d0d5da; padding: 8px 12px; text-align: left; }
-            th { background: #e8edf2; }
-            tr:nth-child(even) td { background: #f9fafb; }
-            .ok { color: #1a7f37; font-weight: bold; }
-            """;
+
+    static String celdaCodigo(String texto) {
+        return "<td class=\"codigo\">" + (texto == null ? "-" : escapar(texto)) + "</td>";
+    }
+    
+    static String celdaToken(String texto) {
+        return "<td class=\"codigo token\">" + (texto == null ? "-" : escapar(texto)) + "</td>";
+    }
+
+    static String celdaHtml(String html) {
+        return "<td>" + html + "</td>";
+    }
+
+    static String insignia(String clase, String texto) {
+        return "<span class=\"insignia " + clase + "\">" + escapar(texto) + "</span>";
+    }
+
+    static String tarjeta(String clase, String etiqueta, int valor) {
+        return "<div class=\"carta " + clase + "\"><div class=\"valor\">" + valor
+                + "</div><div class=\"etiqueta\">" + escapar(etiqueta) + "</div></div>\n";
+    }
+
+    static String pagina(String titulo, String cuerpo) {
+        return "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\">\n"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+                + "<title>" + escapar(titulo) + "</title>\n<style>\n" + ESTILO + "</style>\n</head>\n<body>\n"
+                + "<header><div class=\"cabecera\"><span class=\"marca\">PROMPTZAL</span><h1>"
+                + escapar(titulo) + "</h1></div></header>\n"
+                + "<main>\n" + cuerpo + "</main>\n"
+                + "<footer>Generado por el compilador PromptZal</footer>\n</body>\n</html>\n";
+    }
 }

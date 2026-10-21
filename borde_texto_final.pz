@@ -1,0 +1,7 @@
+AGENTE a {
+ contexto = "c"
+ RESUMIR "uno" -> r1
+}
+EJECUTAR a
+EXPORTAR r1
+EXPORTAR r1

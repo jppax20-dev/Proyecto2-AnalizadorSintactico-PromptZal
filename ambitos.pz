@@ -1,0 +1,19 @@
+AGENTE a {
+ contexto = "x"
+ variable v = "uno"
+ RESUMIR v -> r
+}
+AGENTE b {
+ contexto = "y"
+ variable v = "dos"
+ RESUMIR r -> s
+ RESUMIR t -> u
+ PREGUNTAR "p" SOBRE u -> t
+}
+AGENTE c {
+ contexto = "z"
+ RESUMIR "texto" -> w
+}
+EJECUTAR a
+EJECUTAR b
+EXPORTAR r, s, w
