@@ -1,15 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico;
 
-/**
- *
- * @author jppax
- */
 public enum TipoSimbolo {
-    AGENTE,
-    VARIABLE_DECLARADA,
-    RESULTADO_COMANDO,
+    AGENTE("Agente"),
+    VARIABLE_DECLARADA("Variable declarada"),
+    RESULTADO_COMANDO("Resultado de comando");
+
+    private final String etiqueta;
+
+    TipoSimbolo(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    public String getEtiqueta() { return etiqueta; }
 }

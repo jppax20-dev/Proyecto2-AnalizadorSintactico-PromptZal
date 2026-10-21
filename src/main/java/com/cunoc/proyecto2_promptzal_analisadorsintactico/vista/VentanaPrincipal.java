@@ -1,7 +1,7 @@
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.vista;
 
-import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.AfdPromptZal;
-import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.GeneradorDotAfd;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.GeneradorDot;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.afd.TablaTransiciones;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.compilador.Compilador;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.compilador.ResultadoCompilacion;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.errores.ErrorCompilacion;
@@ -11,6 +11,7 @@ import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteAst;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteErrores;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteSimbolos;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.Simbolo;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -29,6 +30,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.List;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -61,6 +64,7 @@ public class VentanaPrincipal extends JFrame {
         pestanas.addTab("Promptzal", new JScrollPane(panelPrompt));
         pestanas.addTab("Errores", new JScrollPane(panelErrores));
         pestanas.addTab("Tokens", new JScrollPane(panelTokens));
+        pestanas.addTab("Símbolos", scrollSimbolos);
         panelPrompt.setEditable(false);
         panelErrores.setEditable(false);
 
@@ -144,6 +148,13 @@ public class VentanaPrincipal extends JFrame {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
+        
+        modeloSimbolos.setRowCount(0);
+        for (Simbolo s : ultimo.getTabla().getSimbolos()) {
+            modeloSimbolos.addRow(new Object[] {s.getNombre(), s.getTipo().getEtiqueta(), s.getAmbito(), s.getFila()});
+        }
+        pestanas.setTitleAt(pestanas.indexOfComponent(scrollSimbolos),
+                "Símbolos (" + ultimo.getTabla().getSimbolos().size() + ")");
     }
 
     private void guardarPrompt() {
@@ -227,13 +238,22 @@ public class VentanaPrincipal extends JFrame {
         private void generarAfd() {
         try {
             new MostrarGraphviz().compilarImagen(
-                    new GeneradorDotAfd().generar(AfdPromptZal.construir()),
-                    Path.of("reportes/afd.dot"), Path.of("reportes/afd.png"));
-            mensaje("AFD generado en reportes/afd.png");
+        new GeneradorDot(new TablaTransiciones()).generarDot(),
+        Path.of("reportes/afd.dot"), Path.of("reportes/afd.png"));
         } catch (IOException ex) {
             mensaje("No se pudo generar el AFD:\n" + ex.getMessage());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
     }
+        
+        private final DefaultTableModel modeloSimbolos = new DefaultTableModel(
+            new String[] {"Nombre", "Tipo", "Ámbito", "Línea"}, 0) {
+        @Override
+        public boolean isCellEditable(int fila, int columna) {
+            return false;
+        }
+    };
+    private final JScrollPane scrollSimbolos = new JScrollPane(new JTable(modeloSimbolos));
+   
 }

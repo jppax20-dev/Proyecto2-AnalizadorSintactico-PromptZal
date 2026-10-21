@@ -2,7 +2,6 @@ package com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes;
 
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.Simbolo;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.TablaSimbolos;
-import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.TipoSimbolo;
 import java.util.List;
 
 public class ReporteSimbolos {
@@ -20,7 +19,7 @@ public class ReporteSimbolos {
                 sb.append("<tr>")
                         .append(Html.celda(String.valueOf(numero++)))
                         .append(Html.celda(s.getNombre()))
-                        .append(Html.celda(nombre(s.getTipo())))
+                        .append(Html.celda(s.getTipo().getEtiqueta()))
                         .append(Html.celda(s.getAmbito()))
                         .append(Html.celda(String.valueOf(s.getFila())))
                         .append("</tr>\n");
@@ -30,11 +29,5 @@ public class ReporteSimbolos {
         return Html.pagina("Reporte de tabla de símbolos", sb.toString());
     }
 
-    private String nombre(TipoSimbolo tipo) {
-        return switch (tipo) {
-            case AGENTE -> "Agente";
-            case VARIABLE_DECLARADA -> "Variable declarada";
-            case RESULTADO_COMANDO -> "Resultado de comando";
-        };
-    }
+    
 }
