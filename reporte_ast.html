@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AST Visual</title>
+<title>Reporte del AST</title>
 <style>
 :root {
   --fondo: #0a0d14;
@@ -174,73 +174,175 @@ footer {
   letter-spacing: 0.1em;
 }
 
-.cabecera { max-width: 1100px; margin: 0 auto; }
+.cabecera { max-width: 1052px; margin: 0 auto; }
+:root {
+  --celeste: #6ec1ff;
+  --lima: #c8ff6e;
+  --amarillo: #ffd166;
+  --linea: #2f5d7c;
+}
+main { max-width: none; }
+.cabecera { max-width: none; }
+.hud { max-width: 1052px; }
+.raiz { --acento: #ffffff; }
+.grupo { --acento: var(--tenue); }
+.comando { --acento: var(--magenta); }
+.parte { --acento: var(--violeta); }
+.cadena { --acento: var(--celeste); }
+.id { --acento: var(--texto); }
+.numero { --acento: var(--amarillo); }
+.cargar { --acento: var(--lima); }
+.arbol-caja {
+  padding: 28px 24px 34px;
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.4);
+  scrollbar-color: var(--cian) var(--panel2);
+}
+.arbol { width: max-content; margin: 0 auto; }
+.arbol ul {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 20px 0 0;
+  position: relative;
+  list-style: none;
+}
+.arbol > ul { padding-top: 0; }
+.arbol li {
+  flex: none;
+  position: relative;
+  padding: 20px 8px 0;
+  text-align: center;
+  list-style: none;
+}
+.arbol li::before, .arbol li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 50%;
+  width: 50%;
+  height: 20px;
+  border-top: 2px solid var(--linea);
+}
+.arbol li::after { right: auto; left: 50%; border-left: 2px solid var(--linea); }
+.arbol li:only-child::before, .arbol li:only-child::after { display: none; }
+.arbol li:only-child { padding-top: 0; }
+.arbol li:first-child::before, .arbol li:last-child::after { border: 0 none; }
+.arbol li:last-child::before { border-right: 2px solid var(--linea); border-radius: 0 6px 0 0; }
+.arbol li:first-child::after { border-radius: 6px 0 0 0; }
+.arbol ul ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 20px;
+  border-left: 2px solid var(--linea);
+}
+.nodo {
+  display: inline-block;
+  max-width: 260px;
+  padding: 8px 14px;
+  border: 1px solid var(--acento, var(--cian));
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--texto);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: break-word;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.45);
+}
+.nodo.raiz, .nodo.agente, .nodo.variable, .nodo.comando, .nodo.resultado {
+  border-width: 2px;
+  box-shadow: 0 0 12px var(--acento);
+}
+.nodo.raiz { box-shadow: 0 0 14px var(--cian); }
+.nodo b {
+  display: block;
+  white-space: nowrap;
+  color: var(--acento, var(--cian));
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.nodo .valor { display: block; font-family: Consolas, 'Courier New', monospace; }
+.nodo small { display: block; margin-top: 2px; color: var(--tenue); font-size: 0.68rem; white-space: nowrap; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 </style>
 </head>
 <body>
-<header><div class="cabecera"><span class="marca">PROMPTZAL</span><h1>AST Visual</h1></div></header>
+<header><div class="cabecera"><span class="marca">PROMPTZAL</span><h1>Reporte del AST</h1></div></header>
 <main>
-<style>
-  body { font-family: Arial, sans-serif; background: #f4f6f8; overflow-x: auto; }
-  .arbol { white-space: nowrap; margin: 20px; }
-  .arbol ul { padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; padding-left: 0; }
-  .arbol li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; }
-  .arbol li::before, .arbol li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid #ccc; width: 50%; height: 20px; }
-  .arbol li::after { right: auto; left: 50%; border-left: 2px solid #ccc; }
-  .arbol li:only-child::after, .arbol li:only-child::before { display: none; }
-  .arbol li:only-child { padding-top: 0; }
-  .arbol li:first-child::before, .arbol li:last-child::after { border: 0 none; }
-  .arbol li:last-child::before { border-right: 2px solid #ccc; border-radius: 0 5px 0 0; }
-  .arbol li:first-child::after { border-radius: 5px 0 0 0; }
-  .arbol ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #ccc; width: 0; height: 20px; }
-  .arbol li span { border: 2px solid #ccc; padding: 8px 15px; text-decoration: none; color: #333; font-size: 12px; display: inline-block; border-radius: 5px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  .arbol li span b { display: block; margin-bottom: 3px; }
-  .raiz { border-color: #2c3e50 !important; background-color: #2c3e50 !important; color: white !important; }
-  .agente { border-color: #d35400 !important; background-color: #d35400 !important; color: white !important; }
-  .comando { border-color: #2980b9 !important; background-color: #2980b9 !important; color: white !important; }
-  .variable { border-color: #27ae60 !important; background-color: #27ae60 !important; color: white !important; }
-</style>
-<div class="arbol">
-<ul>
-  <li><span class="raiz"><b>Programa</b></span>
-    <ul>
-<li><span><b>@modelo</b>claude-sonnet-4-6</span></li>
-<li><span><b>@rol</b>analista de datos</span></li>
-<li><span><b>@formato</b>markdown</span></li>
-<li><span class="agente"><b>Agente</b>analista</span>
-<ul>
-<li><span><b>Contexto</b>"Eres un analista de datos experto"</span></li>
-<li><span class="variable"><b>Variable</b>ventas</span>
-<ul>
-<li><span>CARGAR(&quot;ventas.csv&quot;)</span></li>
-</ul></li>
-<li><span class="comando"><b>PREGUNTAR</b></span>
-<ul>
-<li><span><b>Argumento</b></span><ul>
-<li><span>&quot;Cuales son las 3 tendencias principales?&quot;</span></li>
-</ul></li>
-<li><span><b>SOBRE</b></span><ul>
-<li><span>ventas</span></li>
-</ul></li>
-<li><span><b>Destino</b>tendencias</span></li>
-</ul></li>
-<li><span class="comando"><b>RESUMIR</b></span>
-<ul>
-<li><span><b>Argumento</b></span><ul>
-<li><span>tendencias</span></li>
-</ul></li>
-<li><span><b>EN</b></span><ul>
-<li><span>100 palabras</span></li>
-</ul></li>
-<li><span><b>Destino</b>resumen</span></li>
-</ul></li>
-</ul></li>
-<li><span><b>Ejecutar</b>analista</span></li>
-<li><span><b>Exportar</b>resumen</span></li>
-    </ul>
-  </li>
-</ul>
+<div class="hud">
+<div class="carta agente"><div class="valor">1</div><div class="etiqueta">Agentes</div></div>
+<div class="carta variable"><div class="valor">1</div><div class="etiqueta">Variables</div></div>
+<div class="carta comando"><div class="valor">2</div><div class="etiqueta">Comandos</div></div>
+<div class="carta resultado"><div class="valor">1</div><div class="etiqueta">Ejecuciones</div></div>
 </div>
+<section class="bloque total">
+<h2>Árbol de sintaxis abstracta</h2>
+<div class="arbol-caja"><div class="arbol">
+<ul>
+<li><span class="nodo raiz"><b>Programa</b></span>
+<ul>
+<li><span class="nodo grupo"><b>Directivas</b></span>
+<ul>
+<li><span class="nodo cadena"><b>@modelo</b><span class="valor">&quot;claude-sonnet-4-6&quot;</span><small>línea 1</small></span></li>
+<li><span class="nodo cadena"><b>@rol</b><span class="valor">&quot;analista de datos&quot;</span><small>línea 2</small></span></li>
+<li><span class="nodo cadena"><b>@formato</b><span class="valor">&quot;markdown&quot;</span><small>línea 3</small></span></li>
+</ul></li>
+<li><span class="nodo grupo"><b>Agentes</b></span>
+<ul>
+<li><span class="nodo agente"><b>Agente</b><span class="valor">analista</span><small>línea 5</small></span>
+<ul>
+<li><span class="nodo cadena"><b>Contexto</b><span class="valor">&quot;Eres un analista de datos experto&quot;</span></span></li>
+<li><span class="nodo variable"><b>Variable</b><span class="valor">ventas</span><small>línea 7</small></span>
+<ul>
+<li><span class="nodo cargar"><b>CARGAR</b><span class="valor">&quot;ventas.csv&quot;</span></span></li>
+</ul></li>
+<li><span class="nodo comando"><b>PREGUNTAR</b><small>línea 7</small></span>
+<ul>
+<li><span class="nodo parte"><b>Argumento</b></span>
+<ul>
+<li><span class="nodo cadena"><b>Cadena</b><span class="valor">&quot;Cuales son las 3 tendencias principales?&quot;</span></span></li>
+</ul></li>
+<li><span class="nodo parte"><b>SOBRE</b></span>
+<ul>
+<li><span class="nodo id"><b>Identificador</b><span class="valor">ventas</span></span></li>
+</ul></li>
+<li><span class="nodo resultado"><b>Destino</b><span class="valor">tendencias</span><small>línea 7</small></span></li>
+</ul></li>
+<li><span class="nodo comando"><b>RESUMIR</b><small>línea 8</small></span>
+<ul>
+<li><span class="nodo parte"><b>Argumento</b></span>
+<ul>
+<li><span class="nodo id"><b>Identificador</b><span class="valor">tendencias</span></span></li>
+</ul></li>
+<li><span class="nodo parte"><b>EN</b></span>
+<ul>
+<li><span class="nodo numero"><b>Número</b><span class="valor">100</span><small>unidad: palabras</small></span></li>
+</ul></li>
+<li><span class="nodo resultado"><b>Destino</b><span class="valor">resumen</span><small>línea 8</small></span></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><span class="nodo grupo"><b>Ejecuciones</b></span>
+<ul>
+<li><span class="nodo id"><b>Ejecutar</b><span class="valor">analista</span><small>línea 10</small></span></li>
+</ul></li>
+<li><span class="nodo grupo"><b>Exportaciones</b></span>
+<ul>
+<li><span class="nodo id"><b>Exportar</b><span class="valor">resumen</span><small>línea 11</small></span></li>
+</ul></li>
+</ul></li>
+</ul>
+</div></div>
+<div class="leyenda"><span class="insignia agente">Agente</span><span class="insignia variable">Variable</span><span class="insignia comando">Comando</span><span class="insignia parte">Argumento / conector</span><span class="insignia resultado">Destino</span><span class="insignia cadena">Cadena</span><span class="insignia id">Identificador</span><span class="insignia numero">Número</span><span class="insignia cargar">CARGAR</span></div>
+</section>
 </main>
 <footer>Generado por el compilador PromptZal</footer>
 </body>

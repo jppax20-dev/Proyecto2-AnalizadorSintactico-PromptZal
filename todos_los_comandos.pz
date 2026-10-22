@@ -1,0 +1,18 @@
+@modelo "claude-sonnet-4-6"
+@rol "asistente"
+@formato "markdown"
+AGENTE a {
+ contexto = "Eres un asistente"
+ variable doc = CARGAR("informe.txt")
+ variable lang = "ingles"
+ PREGUNTAR "Cual es el tema?" SOBRE doc -> p
+ GENERAR codigo DESDE "una calculadora" -> g
+ RESUMIR doc EN 50 palabras -> r
+ ANALIZAR doc SOBRE "riesgos" -> an
+ TRADUCIR r EN lang -> t
+ CLASIFICAR doc EN "positivo, negativo" -> c
+ EXTRAER "fechas" DESDE doc -> e
+ RESUMIR doc COMO "lista" -> l
+}
+EJECUTAR a
+EXPORTAR p, g, r, an, t, c, e, l

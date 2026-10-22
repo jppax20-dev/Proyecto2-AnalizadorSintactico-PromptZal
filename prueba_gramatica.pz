@@ -1,0 +1,143 @@
+/* =========================================================================
+   ARCHIVO UNICO DE PRUEBA DESTRUCTIVA TOTAL - PROMPTZAL V3
+   Pon a prueba JFlex, Parser Descendente Recursivo, Modo Panico y Semantica
+   ========================================================================= */
+
+@modelo "claude-sonnet-4-6"
+@rol "Experto en QA con simbolos trampa: -> + = { } ( ) , // /* */ @formato"
+@formato "markdown"
+
+// -------------------------------------------------------------------------
+// 1. PRUEBA DE FUEGO LEXICA (Caracteres ilegales sueltos y pegados a tokens)
+// JFlex debe reportar: $ % & ? ¡ ¿ ~ ^ @invalido .5 10.20.30 y seguir vivo
+// -------------------------------------------------------------------------
+$ % & ? ¡ ¿ ~ ^
+
+// -------------------------------------------------------------------------
+// 2. AGENTE VALIDO AL LIMITE (Prueba todas las reglas sin espacios, 
+//    concatenaciones multiples, unidades y las 2 excepciones semanticas)
+// -------------------------------------------------------------------------
+AGENTE agente_extremo_1 {
+    contexto="Contexto pegado sin espacios con // y /* adentro */ de la cadena"
+    
+    // Variables con todos los tipos de <termino> y <unidad> sin espacios
+    variable v_base=CARGAR("datos_ventas_2026.csv")
+    variable v_num=100+25.50
+    variable v_unidad=1500palabras+0.75porcentaje+10.5segundos
+    variable v_concat="Inicio: "+v_base+" | Total: "+v_num+" | Meta: "+v_unidad+CARGAR("anexo.txt")
+
+    // Todos los COMANDO_IA y todos los CONECTOR (SOBRE, DESDE, EN, COMO)
+    PREGUNTAR "Cuales son las anomalias?"+v_concat SOBRE v_base EN 50 palabras COMO "tabla" -> r_pregunta
+    
+    // EXCEPCION SEMANTICA 1 y 2: 'codigo_python_optimizado' NO es variable (es el 1er arg de GENERAR)
+    // y 'lineas_codigo' / 'archivos' son <unidad> de NUMERO, NO son variables.
+    GENERAR codigo_python_optimizado DESDE r_pregunta SOBRE v_base EN 200 lineas_codigo + 3 archivos COMO "script .py" -> r_codigo
+    
+    // Uso de resultado de comando anterior ('r_codigo') como variable declarada
+    RESUMIR r_codigo + " resumido" EN 100 palabras COMO "bullets" -> r_resumen
+    ANALIZAR r_resumen SOBRE v_concat DESDE "criterio estricto" EN 5 puntos COMO "json" -> r_analisis
+    TRADUCIR r_analisis + " al ingles" EN "Ingles Tecnico" COMO "texto plano" -> r_traduccion
+    CLASIFICAR r_traduccion EN "Urgente, Normal, Descartable" SOBRE v_base COMO "csv" -> r_clasificacion
+    EXTRAER "fechas y montos" + v_num DESDE r_clasificacion SOBRE v_base EN 10 filas COMO "lista" -> r_extraccion
+}
+
+// -------------------------------------------------------------------------
+// 3. AGENTE VALIDO SIN VARIABLES (Prueba la regla <variables> -> epsilon
+//    y comandos sin conectores <conectores> -> epsilon)
+// -------------------------------------------------------------------------
+AGENTE agente_sin_variables {
+    contexto = "Agente minimalista para probar producciones vacias (epsilon)"
+    GENERAR portada_ejecutiva -> r_portada
+    RESUMIR r_portada -> r_portada_corta
+}
+
+// -------------------------------------------------------------------------
+// 4. AGENTE CON ERRORES SEMANTICOS (Sintaxis 100% valida, pero viola reglas
+//    de Tabla de Simbolos y Ambitos/Scopes)
+// -------------------------------------------------------------------------
+// ERROR SEMANTICO: Nombre de agente duplicado (ya existe 'agente_extremo_1')
+AGENTE agente_extremo_1 {
+    contexto = "Clon ilegal para probar deteccion de agentes duplicados"
+    variable local_clon = "ok"
+    PREGUNTAR "Todo bien?" SOBRE local_clon -> r_clon
+}
+
+AGENTE agente_trampas_semanticas {
+    contexto = "Probando aislamiento de ambitos y variables no declaradas"
+    
+    // ERROR SEMANTICO: 'v_base' existe en 'agente_extremo_1', pero NO en este ambito
+    variable robo_ambito = v_base + " texto"
+    
+    // ERROR SEMANTICO: 'var_fantasma' no ha sido declarada antes
+    variable uso_no_declarada = var_fantasma + 100 palabras
+    
+    // ERROR SEMANTICO: 'futura_var' se usa antes de ser declarada abajo
+    PREGUNTAR "Pregunta con variable futura" SOBRE futura_var -> r_temprano
+    variable futura_var = "declarada demasiado tarde"
+    
+    // ERROR SEMANTICO: En PREGUNTAR el 1er argumento SI se valida como variable (solo GENERAR tiene excepcion)
+    PREGUNTAR identificador_no_declarado_en_preguntar SOBRE futura_var -> r_preg_mal
+    
+    // ERROR SEMANTICO: En GENERAR el 2do termino de la suma SI debe validarse como variable
+    GENERAR tipo_valido + var_inexistente_en_suma DESDE futura_var -> r_gen_mal
+}
+
+// -------------------------------------------------------------------------
+// 5. AGENTE FANTASMA (Es valido, pero NO se pondra en EJECUTAR para probar
+//    que EXPORTAR rechace sus variables)
+// -------------------------------------------------------------------------
+AGENTE agente_no_ejecutado {
+    contexto = "Mis variables existen en la tabla de simbolos pero nunca me ejecutan"
+    variable var_aislada = "secreto"
+    EXTRAER "datos" DESDE var_aislada -> r_prohibido_exportar
+}
+
+// -------------------------------------------------------------------------
+// 6. AGENTE DESTRUCTOR SINTACTICO (Prueba de recuperacion en Modo Panico:
+//    debe sincronizar en VARIABLE, COMANDO_IA, LLAVE_C, AGENTE, EJECUTAR)
+// -------------------------------------------------------------------------
+AGENTE agente_roto_sintaxis {
+    // ERROR SINTACTICO 1: Falta el signo '=' en contexto
+    contexto "Contexto sin signo igual"
+    
+    // ERROR SINTACTICO 2: Variable sin expresion asignada
+    variable var_incompleta = 
+    
+    // ERROR SINTACTICO 3: CARGAR sin parentesis ni cadena
+    variable var_cargar_mal = CARGAR "archivo_sin_parentesis.csv"
+    
+    // ERROR SINTACTICO 4: Doble signo MAS seguido en una expresion
+    variable var_doble_mas = "hola" + + "mundo"
+    
+    // Variable sana para comprobar que el parser se recupero dentro de <variables>
+    variable var_sana_post_panico = "Sobrevivi al modo panico"
+    
+    // ERROR SINTACTICO 5: Comando sin FLECHA (->) ni variable destino
+    PREGUNTAR "Pregunta sin flecha de salida" SOBRE var_sana_post_panico
+    
+    // ERROR SINTACTICO 6: Conector 'SOBRE' sin expresion antes de la flecha
+    RESUMIR var_sana_post_panico SOBRE -> r_mal_conector
+    
+    // ERROR SINTACTICO 7: Flecha sin identificador de destino
+    ANALIZAR var_sana_post_panico -> 
+    
+    // Comando sano para verificar que el parser se recupero antes de cerrar el agente
+    TRADUCIR var_sana_post_panico EN "Frances" -> r_sobreviviente
+}
+
+// -------------------------------------------------------------------------
+// 7. EJECUCIONES Y EXPORTACIONES (Pruebas semanticas de cruce final)
+// -------------------------------------------------------------------------
+EJECUTAR agente_extremo_1
+EJECUTAR agente_sin_variables
+EJECUTAR agente_trampas_semanticas
+EJECUTAR agente_roto_sintaxis
+
+// ERROR SEMANTICO: Ejecutar un agente que NO fue declarado nunca
+EJECUTAR agente_inexistente_404
+
+// EXPORTAR combinando variables validas con variables trampa:
+// - r_extraccion, r_portada_corta, r_sobreviviente: VALIDAS (agentes ejecutados)
+// - r_prohibido_exportar: ERROR SEMANTICO (el 'agente_no_ejecutado' existe, pero NO se ejecuto)
+// - var_totalmente_falsa: ERROR SEMANTICO (no existe en ningun agente)
+EXPORTAR r_extraccion, r_portada_corta, r_sobreviviente, r_prohibido_exportar, var_totalmente_falsa

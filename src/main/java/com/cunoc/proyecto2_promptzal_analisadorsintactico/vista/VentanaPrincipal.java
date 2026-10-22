@@ -12,81 +12,184 @@ import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteAst;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteErrores;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.reportes.ReporteSimbolos;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.Simbolo;
+
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.util.List;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 public class VentanaPrincipal extends JFrame {
 
     private final JTextArea editor = new JTextArea();
+    private final JTextArea lineas = new JTextArea(" 1 ");
     private final JTextArea panelPrompt = new JTextArea();
-    private final JTextArea panelErrores = new JTextArea();
-    private final JTextArea panelTokens = new JTextArea();
-    private final JTabbedPane pestanas = new JTabbedPane();
+    private final JTabbedPane pestanasEditor = new JTabbedPane();
+    private final JTabbedPane pestanasInferior = new JTabbedPane();
+    private final JTabbedPane pestanasIzquierda = new JTabbedPane();
+    private final JLabel etiquetaEstado = new JLabel(" Listo");
+    private final JLabel etiquetaCursor = new JLabel("1 : 1 ");
     private final Compilador compilador = new Compilador();
     private ResultadoCompilacion ultimo;
     private Path archivoActual;
 
+    private final DefaultTableModel modeloSimbolos = crearModelo("Nombre", "Tipo", "Ámbito", "Línea");
+    private final DefaultTableModel modeloTokens = crearModelo("Tipo", "Lexema", "Fila", "Columna");
+    private final DefaultTableModel modeloErrores = crearModelo("Tipo", "Fila", "Columna", "Descripción");
+
+    private final JScrollPane scrollSimbolos = new JScrollPane(new JTable(modeloSimbolos));
+    private final JScrollPane scrollTokens = new JScrollPane(new JTable(modeloTokens));
+    private final JScrollPane scrollErrores = new JScrollPane(new JTable(modeloErrores));
+
     public VentanaPrincipal() {
-        super("PromptZal");
+        super("PromptZal IDE");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1000, 700);
+        setSize(1100, 750);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
         construir();
+    }
+
+    private DefaultTableModel crearModelo(String... columnas) {
+        return new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;
+            }
+        };
     }
 
     private void construir() {
         Font fuente = new Font(Font.MONOSPACED, Font.PLAIN, 14);
-        for (JTextArea area : new JTextArea[] {editor, panelPrompt, panelErrores, panelTokens}) {
-            area.setFont(fuente);
+        editor.setFont(fuente);
+        lineas.setFont(fuente);
+        panelPrompt.setFont(fuente);
+
+        lineas.setEditable(false);
+        lineas.setFocusable(false);
+        panelPrompt.setEditable(false);
+
+        JToolBar barraSuperior = new JToolBar();
+        barraSuperior.setFloatable(false);
+        barraSuperior.add(boton("Guardar", this::guardar));
+        barraSuperior.addSeparator();
+        barraSuperior.add(boton("Compilar", this::compilar));
+        barraSuperior.add(boton("Guardar promptzal", this::guardarPrompt));
+        barraSuperior.addSeparator();
+        barraSuperior.add(boton("Reportes", this::generarReportes));
+
+        JPanel panelBotonesIzquierda = new JPanel(new GridLayout(0, 1, 0, 5));
+        panelBotonesIzquierda.add(boton("Abrir", this::abrir));
+        panelBotonesIzquierda.add(boton("AFD", this::generarAfd));
+
+        JPanel contenedorIzquierda = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.insets = new Insets(8, 8, 8, 8);
+        contenedorIzquierda.add(panelBotonesIzquierda, gbc);
+
+        gbc.gridy = 1;
+        gbc.weighty = 1.0;
+        contenedorIzquierda.add(new JPanel(), gbc);
+
+        pestanasIzquierda.addTab("Explorador", contenedorIzquierda);
+        pestanasIzquierda.setMinimumSize(new Dimension(150, 0));
+
+        JScrollPane scrollEditor = new JScrollPane(editor);
+        scrollEditor.setRowHeaderView(lineas);
+        pestanasEditor.addTab("SinTitulo.pz", scrollEditor);
+
+        pestanasInferior.addTab("Promptzal", new JScrollPane(panelPrompt));
+        pestanasInferior.addTab("Errores (0)", scrollErrores);
+        pestanasInferior.addTab("Tokens (0)", scrollTokens);
+        pestanasInferior.addTab("Símbolos (0)", scrollSimbolos);
+
+        JSplitPane divisionVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pestanasEditor, pestanasInferior);
+        divisionVertical.setResizeWeight(0.7);
+
+        JSplitPane divisionHorizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pestanasIzquierda, divisionVertical);
+        divisionHorizontal.setDividerLocation(180);
+
+        JPanel barraEstado = new JPanel(new BorderLayout());
+        barraEstado.setBorder(BorderFactory.createEtchedBorder());
+        barraEstado.add(etiquetaEstado, BorderLayout.WEST);
+        barraEstado.add(etiquetaCursor, BorderLayout.EAST);
+
+        editor.addCaretListener(e -> actualizarCursor());
+        editor.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                actualizarLineas();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                actualizarLineas();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                actualizarLineas();
+            }
+        });
+
+        add(barraSuperior, BorderLayout.NORTH);
+        add(divisionHorizontal, BorderLayout.CENTER);
+        add(barraEstado, BorderLayout.SOUTH);
+    }
+
+    private void actualizarLineas() {
+        int total = editor.getLineCount();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= total; i++) {
+            sb.append(" ").append(i).append(" \n");
         }
-        panelPrompt.setEditable(false);
-        panelErrores.setEditable(false);
-        panelTokens.setEditable(false);
-
-        pestanas.addTab("Promptzal", new JScrollPane(panelPrompt));
-        pestanas.addTab("Errores", new JScrollPane(panelErrores));
-        pestanas.addTab("Tokens", new JScrollPane(panelTokens));
-        pestanas.addTab("Símbolos", scrollSimbolos);
-        panelPrompt.setEditable(false);
-        panelErrores.setEditable(false);
-
-        JSplitPane division = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(editor), pestanas);
-        division.setResizeWeight(0.6);
-
-        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        barra.add(boton("Abrir", this::abrir));
-        barra.add(boton("Guardar", this::guardar));
-        barra.add(boton("Compilar", this::compilar));
-        barra.add(boton("Guardar promptzal", this::guardarPrompt));
-        barra.add(boton("Reportes", this::generarReportes));
-        barra.add(boton("AFD", this::generarAfd));
-
-        add(barra, BorderLayout.NORTH);
-        add(division, BorderLayout.CENTER);
+        lineas.setText(sb.toString());
     }
 
     private JButton boton(String texto, Runnable accion) {
         JButton boton = new JButton(texto);
+        boton.setFocusable(false);
         boton.addActionListener(e -> accion.run());
         return boton;
+    }
+
+    private void actualizarCursor() {
+        try {
+            int pos = editor.getCaretPosition();
+            int fila = editor.getLineOfOffset(pos);
+            int col = pos - editor.getLineStartOffset(fila);
+            etiquetaCursor.setText((fila + 1) + " : " + (col + 1) + " ");
+        } catch (Exception ex) {
+            etiquetaCursor.setText("1 : 1 ");
+        }
     }
 
     private void abrir() {
@@ -97,7 +200,11 @@ public class VentanaPrincipal extends JFrame {
         try {
             editor.setText(Files.readString(ruta));
             archivoActual = ruta;
-            setTitle("PromptZal - " + ruta.getFileName());
+            String nombre = ruta.getFileName().toString();
+            setTitle("PromptZal IDE - " + nombre);
+            pestanasEditor.setTitleAt(0, nombre);
+            etiquetaEstado.setText(" Archivo cargado: " + nombre);
+            editor.setCaretPosition(0);
         } catch (IOException ex) {
             mensaje("No se pudo abrir el archivo: " + ex.getMessage());
         }
@@ -109,52 +216,55 @@ public class VentanaPrincipal extends JFrame {
             chooser.setFileFilter(new FileNameExtensionFilter("Archivos PromptZal (*.pz)", "pz"));
             if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
             archivoActual = conExtension(chooser.getSelectedFile().toPath(), ".pz");
-            setTitle("PromptZal - " + archivoActual.getFileName());
+            String nombre = archivoActual.getFileName().toString();
+            setTitle("PromptZal IDE - " + nombre);
+            pestanasEditor.setTitleAt(0, nombre);
         }
-        escribir(archivoActual, editor.getText());
+        if (escribir(archivoActual, editor.getText())) {
+            etiquetaEstado.setText(" Guardado: " + archivoActual.getFileName());
+        }
     }
 
     private void compilar() {
         ultimo = compilador.compilar(editor.getText());
         panelPrompt.setText(ultimo.getPromptzal());
-
-        StringBuilder sb = new StringBuilder();
-        for (ErrorCompilacion e : ultimo.getErrores()) {
-            sb.append(e.getTipo()).append(" [").append(e.getFila()).append(':')
-                    .append(e.getColumna()).append("] ").append(e.getDescripcion()).append('\n');
-        }
-        panelErrores.setText(textoErrores(ultimo.getErrores()));
-        pestanas.setTitleAt(1, "Errores (" + ultimo.getErrores().size() + ")");
         panelPrompt.setCaretPosition(0);
-        panelErrores.setCaretPosition(0);
 
-        StringBuilder tokens = new StringBuilder(String.format("%-14s %-32s %s%n", "TIPO", "LEXEMA", "FILA:COL"));
-        for (Token t : ultimo.getTokens()) {
-            tokens.append(String.format("%-14s %-32s %d:%d%n", t.getTipo(), t.getLexema(), t.getFila(), t.getColumna()));
+        modeloErrores.setRowCount(0);
+        for (ErrorCompilacion e : ultimo.getErrores()) {
+            modeloErrores.addRow(new Object[]{e.getTipo(), e.getFila(), e.getColumna(), e.getDescripcion()});
         }
-        panelTokens.setText(tokens.toString());
-        pestanas.setTitleAt(2, "Tokens (" + ultimo.getTokens().size() + ")");
-        panelTokens.setCaretPosition(0);
-        
-        GeneradorDotAst generadorAst = new GeneradorDotAst();
-        String codigoDot = generadorAst.generarCodigo(ultimo.getPrograma());
+        pestanasInferior.setTitleAt(1, "Errores (" + ultimo.getErrores().size() + ")");
+
+        modeloTokens.setRowCount(0);
+        for (Token t : ultimo.getTokens()) {
+            modeloTokens.addRow(new Object[]{t.getTipo(), t.getLexema(), t.getFila(), t.getColumna()});
+        }
+        pestanasInferior.setTitleAt(2, "Tokens (" + ultimo.getTokens().size() + ")");
+
+        modeloSimbolos.setRowCount(0);
+        for (Simbolo s : ultimo.getTabla().getSimbolos()) {
+            modeloSimbolos.addRow(new Object[]{s.getNombre(), s.getTipo().getEtiqueta(), s.getAmbito(), s.getFila()});
+        }
+        pestanasInferior.setTitleAt(3, "Símbolos (" + ultimo.getTabla().getSimbolos().size() + ")");
 
         try {
             new MostrarGraphviz().compilarImagen(
-            new GeneradorDotAst().generarCodigo(ultimo.getPrograma()),
-            Path.of("reportes/ast.dot"), Path.of("reportes/ast.png"));
+                    new GeneradorDotAst().generarCodigo(ultimo.getPrograma()),
+                    Path.of("reportes/ast.dot"), Path.of("reportes/ast.png"));
         } catch (IOException ex) {
             mensaje("No se pudo generar la imagen del AST:\n" + ex.getMessage());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
-        
-        modeloSimbolos.setRowCount(0);
-        for (Simbolo s : ultimo.getTabla().getSimbolos()) {
-            modeloSimbolos.addRow(new Object[] {s.getNombre(), s.getTipo().getEtiqueta(), s.getAmbito(), s.getFila()});
+
+        if (ultimo.getErrores().isEmpty()) {
+            etiquetaEstado.setText(" Compilación exitosa");
+            pestanasInferior.setSelectedIndex(0);
+        } else {
+            etiquetaEstado.setText(" Compilación terminada con " + ultimo.getErrores().size() + " errores");
+            pestanasInferior.setSelectedIndex(1);
         }
-        pestanas.setTitleAt(pestanas.indexOfComponent(scrollSimbolos),
-                "Símbolos (" + ultimo.getTabla().getSimbolos().size() + ")");
     }
 
     private void guardarPrompt() {
@@ -185,7 +295,23 @@ public class VentanaPrincipal extends JFrame {
                 new ReporteSimbolos().generar(ultimo.getTabla()));
         ok &= escribir(carpeta.resolve("reporte_ast.html"),
                 new ReporteAst().generar(ultimo.getPrograma()));
-        if (ok) mensaje("Reportes generados en: " + carpeta);
+        if (ok) {
+            etiquetaEstado.setText(" Reportes generados en: " + carpeta);
+            mensaje("Reportes generados en: " + carpeta);
+        }
+    }
+
+    private void generarAfd() {
+        try {
+            new MostrarGraphviz().compilarImagen(
+                    new GeneradorDot(new TablaTransiciones()).generarDot(),
+                    Path.of("reportes/afd.dot"), Path.of("reportes/afd.png"));
+            etiquetaEstado.setText(" Imagen AFD generada en reportes/afd.png");
+        } catch (IOException ex) {
+            mensaje("No se pudo generar el AFD:\n" + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private boolean escribir(Path ruta, String contenido) {
@@ -213,47 +339,4 @@ public class VentanaPrincipal extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new VentanaPrincipal().setVisible(true));
     }
-    
-    private String textoErrores(List<ErrorCompilacion> errores) {
-        if (errores.isEmpty()) return "Sin errores.";
-        StringBuilder sb = new StringBuilder();
-        seccion(sb, "ERRORES LÉXICOS", errores, ErrorCompilacion.Tipo.LEXICO);
-        seccion(sb, "ERRORES SINTÁCTICOS", errores, ErrorCompilacion.Tipo.SINTACTICO);
-        seccion(sb, "ERRORES SEMÁNTICOS", errores, ErrorCompilacion.Tipo.SEMANTICO);
-        return sb.toString();
-    }
-
-    private void seccion(StringBuilder sb, String titulo, List<ErrorCompilacion> errores,
-                         ErrorCompilacion.Tipo tipo) {
-        List<ErrorCompilacion> delTipo = errores.stream().filter(e -> e.getTipo() == tipo).toList();
-        if (delTipo.isEmpty()) return;
-        if (sb.length() > 0) sb.append('\n');
-        sb.append(titulo).append(" (").append(delTipo.size()).append(")\n");
-        for (ErrorCompilacion e : delTipo) {
-            sb.append("  [").append(e.getFila()).append(':').append(e.getColumna()).append("] ")
-                    .append(e.getDescripcion()).append('\n');
-        }
-    }
-    
-        private void generarAfd() {
-        try {
-            new MostrarGraphviz().compilarImagen(
-        new GeneradorDot(new TablaTransiciones()).generarDot(),
-        Path.of("reportes/afd.dot"), Path.of("reportes/afd.png"));
-        } catch (IOException ex) {
-            mensaje("No se pudo generar el AFD:\n" + ex.getMessage());
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-    }
-        
-        private final DefaultTableModel modeloSimbolos = new DefaultTableModel(
-            new String[] {"Nombre", "Tipo", "Ámbito", "Línea"}, 0) {
-        @Override
-        public boolean isCellEditable(int fila, int columna) {
-            return false;
-        }
-    };
-    private final JScrollPane scrollSimbolos = new JScrollPane(new JTable(modeloSimbolos));
-   
 }

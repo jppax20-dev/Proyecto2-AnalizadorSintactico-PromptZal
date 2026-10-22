@@ -172,7 +172,7 @@ final class Html {
               letter-spacing: 0.1em;
             }
                                          
-            .cabecera { max-width: 1100px; margin: 0 auto; }
+            .cabecera { max-width: 1052px; margin: 0 auto; }
             """;
 
     private Html() {
@@ -216,9 +216,13 @@ final class Html {
     }
 
     static String pagina(String titulo, String cuerpo) {
+        return pagina(titulo, cuerpo, "");
+    }
+
+    static String pagina(String titulo, String cuerpo, String estiloExtra) {
         return "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\">\n"
                 + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-                + "<title>" + escapar(titulo) + "</title>\n<style>\n" + ESTILO + "</style>\n</head>\n<body>\n"
+                + "<title>" + escapar(titulo) + "</title>\n<style>\n" + ESTILO + estiloExtra + "</style>\n</head>\n<body>\n"
                 + "<header><div class=\"cabecera\"><span class=\"marca\">PROMPTZAL</span><h1>"
                 + escapar(titulo) + "</h1></div></header>\n"
                 + "<main>\n" + cuerpo + "</main>\n"
