@@ -4,6 +4,7 @@ import com.cunoc.proyecto2_promptzal_analisadorsintactico.ast.Programa;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.errores.ErrorCompilacion;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.generador.GeneradorPromptzal;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.AnalizadorLexico;
+import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.parser.Parser;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.AnalizadorSemantico;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico.TablaSimbolos;
@@ -26,5 +27,11 @@ public class Compilador {
         .thenComparingInt(ErrorCompilacion::getColumna));
 
         return new ResultadoCompilacion(lexico.getTokens(), errores, programa, tabla, promptzal);
+    }
+    
+        public List<Token> tokenizar(String texto) {
+        AnalizadorLexico lexico = new AnalizadorLexico();
+        lexico.analizar(texto);
+        return lexico.getTokens();
     }
 }
