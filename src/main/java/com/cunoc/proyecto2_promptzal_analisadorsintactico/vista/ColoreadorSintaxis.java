@@ -15,31 +15,28 @@ import javax.swing.text.StyledDocument;
 
 final class ColoreadorSintaxis {
 
-    private static final Color COMENTARIO = new Color(120, 120, 120);
     private static final Map<TipoToken, Color> COLORES = new EnumMap<>(TipoToken.class);
     private static final Pattern CADENAS_Y_COMENTARIOS =
             Pattern.compile("\"[^\"\\r\\n]*\"?|//[^\\r\\n]*|/\\*.*?(?:\\*/|\\z)", Pattern.DOTALL);
 
     static {
-        Color reservada = new Color(0, 51, 204);
-        Color comando = new Color(0, 128, 128);
         for (TipoToken tipo : new TipoToken[] {TipoToken.AGENTE, TipoToken.CONTEXTO, TipoToken.VARIABLE,
                 TipoToken.EJECUTAR, TipoToken.EXPORTAR}) {
-            COLORES.put(tipo, reservada);
+            COLORES.put(tipo, Tema.CIAN);
         }
-        COLORES.put(TipoToken.DIRECTIVA, new Color(128, 0, 128));
-        COLORES.put(TipoToken.COMANDO_IA, comando);
-        COLORES.put(TipoToken.CARGAR, comando);
-        COLORES.put(TipoToken.CONECTOR, new Color(204, 102, 0));
-        COLORES.put(TipoToken.CADENA, new Color(0, 153, 0));
-        COLORES.put(TipoToken.NUMERO, new Color(200, 0, 0));
+        COLORES.put(TipoToken.DIRECTIVA, Tema.VIOLETA);
+        COLORES.put(TipoToken.COMANDO_IA, Tema.MAGENTA);
+        COLORES.put(TipoToken.CARGAR, Tema.LIMA);
+        COLORES.put(TipoToken.CONECTOR, Tema.AMBAR);
+        COLORES.put(TipoToken.CADENA, Tema.VERDE);
+        COLORES.put(TipoToken.NUMERO, Tema.AMARILLO);
     }
 
     private ColoreadorSintaxis() {
     }
 
     static void colorear(StyledDocument documento, String texto, List<Token> tokens) {
-        pintar(documento, 0, documento.getLength(), Color.BLACK, false);
+        pintar(documento, 0, documento.getLength(), Tema.TEXTO, false);
         Element raiz = documento.getDefaultRootElement();
         for (Token token : tokens) {
             Color color = COLORES.get(token.getTipo());
@@ -51,7 +48,7 @@ final class ColoreadorSintaxis {
         Matcher coincidencia = CADENAS_Y_COMENTARIOS.matcher(texto);
         while (coincidencia.find()) {
             if (coincidencia.group().startsWith("/")) {
-                pintar(documento, coincidencia.start(), coincidencia.end() - coincidencia.start(), COMENTARIO, true);
+                pintar(documento, coincidencia.start(), coincidencia.end() - coincidencia.start(), Tema.TENUE, true);
             }
         }
     }

@@ -14,5 +14,5 @@ AGENTE a {
  EXTRAER "fechas" DESDE doc -> e
  RESUMIR doc COMO "lista" -> l
 }
-EJECUTAR a
+EJECUTAR a, b
 EXPORTAR p, g, r, an, t, c, e, l

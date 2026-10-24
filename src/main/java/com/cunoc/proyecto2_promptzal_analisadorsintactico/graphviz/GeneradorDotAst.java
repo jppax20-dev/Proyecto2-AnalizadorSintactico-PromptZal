@@ -17,6 +17,7 @@ public class GeneradorDotAst {
         StringBuilder dot = new StringBuilder();
         
         dot.append("digraph AST {\n");
+        dot.append("  bgcolor=\"#0a0d14\";\n");
         dot.append("  rankdir=TB;\n");
         dot.append("  node [shape=box, style=\"rounded,filled\", fontname=\"Helvetica\", fillcolor=\"#f8f9fa\", color=\"#343a40\"];\n");
         dot.append("  edge [color=\"#adb5bd\", dir=none];\n\n");

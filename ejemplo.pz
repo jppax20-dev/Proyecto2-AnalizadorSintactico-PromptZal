@@ -1,5 +1,5 @@
 @modelo "claude-sonnet-4-6"
-@rol "analista de datos"
+@rol "analista de datos IA"
 @formato "markdown"
 // Agente que prepara el analisis de un archivo de ventas
 AGENTE analista {

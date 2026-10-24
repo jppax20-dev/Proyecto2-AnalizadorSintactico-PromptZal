@@ -1,7 +1,7 @@
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.vista;
 
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
-import java.awt.Color;
+import java.awt.Insets;
 import java.awt.Image;
 import java.nio.file.Path;
 import java.util.List;
@@ -37,8 +37,12 @@ class PestanaEditor extends JScrollPane {
         editor.setCaretPosition(0);
 
         lineas.setFont(editor.getFont());
-        lineas.setBackground(new Color(240, 240, 240));
-        lineas.setForeground(Color.GRAY);
+        lineas.setBackground(Tema.PANEL_CLARO);
+        lineas.setForeground(Tema.TENUE);
+        lineas.setMargin(new Insets(0, 0, 0, 0));
+        lineas.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, Tema.BORDE),
+                BorderFactory.createEmptyBorder(4, 4, 4, 4)));
         lineas.setEditable(false);
         lineas.setFocusable(false);
 
