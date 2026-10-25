@@ -1,0 +1,37 @@
+@modelo "claude-sonnet-4-6"
+@rol "arquitecto de software y analista senior de datos"
+@formato "markdown"
+
+AGENTE extractor {
+contexto = "Eres un ingeniero de datos experto especializado en limpieza de formatos y extraccion tabular."
+variable dataset_crudo = CARGAR("datos_brutos_2026.csv")
+variable umbral_calidad = 0.85
+variable titulo_reporte = "Auditoria de Datos de Ingresos"
+EXTRAER "registros con anomalias de formato" DESDE dataset_crudo COMO "json" -> anomalias
+ANALIZAR anomalias SOBRE umbral_calidad COMO "markdown" -> analisis_preliminar
+RESUMIR analisis_preliminar EN 150 palabras -> resumen_anomalias
+}
+
+AGENTE financiero {
+contexto = "Eres un director financiero con amplia experiencia en proyecciones presupuestarias."
+variable proyeccion_base = CARGAR("presupuesto_q4.json")
+variable divisa = "USD"
+variable notas_extra = "Incluir analisis de sensibilidad bajo escenarios de inflacion moderada."
+ANALIZAR proyeccion_base SOBRE divisa SOBRE notas_extra COMO "markdown" -> evaluacion_financiera
+PREGUNTAR "Cuales son los 3 rubros con mayor desviacion presupuestaria?" SOBRE evaluacion_financiera COMO "texto plano" -> desviaciones_clave
+TRADUCIR desviaciones_clave EN "ingles" COMO "texto plano" -> desviaciones_en
+GENERAR "tabla resumen de riesgos financieros" DESDE desviaciones_en EN 50 palabras -> tabla_riesgos
+}
+
+AGENTE sintetizador {
+contexto = "Eres un consultor ejecutivo enfocado en presentaciones de alto impacto para la junta directiva."
+variable objetivo_principal = "Preparar recomendaciones estrategicas finales basadas en los hallazgos previos."
+CLASIFICAR resumen_anomalias EN "critico, moderado, bajo" DESDE objetivo_principal COMO "lista" -> clasificacion_final
+RESUMIR clasificacion_final EN 80 palabras -> conclusion_ejecutiva
+}
+
+EJECUTAR extractor
+EJECUTAR financiero
+EJECUTAR sintetizador
+
+EXPORTAR resumen_anomalias, tabla_riesgos, conclusion_ejecutiva

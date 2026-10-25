@@ -71,6 +71,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import javax.swing.tree.TreePath;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -103,6 +104,7 @@ public class VentanaPrincipal extends JFrame {
         private final ResultadoCompilacion resultado;
         private final int totalLineas;
         private BufferedImage imagenAst;
+        private Path rutaImagenAst;
         private double zoomAst = 1.0;
         private String mensajeAst = "Generando imagen del AST...";
 
@@ -111,7 +113,7 @@ public class VentanaPrincipal extends JFrame {
             this.totalLineas = totalLineas;
         }
     }
-
+    //Atributos
     private final Compilador compilador = new Compilador();
     private final Image fondo;
     private final Map<PestanaEditor, JLabel> titulos = new HashMap<>();
@@ -146,7 +148,13 @@ public class VentanaPrincipal extends JFrame {
     private final DefaultTreeModel modeloEsquema = new DefaultTreeModel(raizEsquema);
     private final JTree arbolEsquema = new JTree(modeloEsquema);
     private final JScrollPane scrollEsquema = new JScrollPane(arbolEsquema);
-
+    
+    
+    private final JPanel contenedorBotonAst = new JPanel(new BorderLayout());
+    private JButton botonAstActual;
+    private final JPanel contenedorBotonGuardarAst = new JPanel(new BorderLayout());
+    private JButton botonGuardarAstActual;
+    
     private File ultimoDirectorio;
 
     public VentanaPrincipal() {
@@ -314,6 +322,23 @@ public class VentanaPrincipal extends JFrame {
         render.setTextSelectionColor(Color.WHITE);
         arbolEsquema.setCellRenderer(render);
         scrollEsquema.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Tema.BORDE));
+        
+                arbolEsquema.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                PestanaEditor pestana = getPestanaActual();
+                TreePath ruta = arbolEsquema.getPathForLocation(e.getX(), e.getY());
+                if (e.getClickCount() != 2 || ruta == null || pestana == null) return;
+                String texto = ruta.getLastPathComponent().toString();
+                int inicio = texto.lastIndexOf("(L");
+                if (inicio < 0) return;
+                try {
+                    pestana.irA(Integer.parseInt(texto.substring(inicio + 2, texto.length() - 1)), 1);
+                } catch (NumberFormatException ex) {
+                    // nodo de grupo, sin número de línea
+                }
+            }
+        });
     }
 
     private void configurarZoomAst() {
@@ -370,10 +395,16 @@ public class VentanaPrincipal extends JFrame {
     private JTabbedPane panelExplorador() {
         JPanel botones = new JPanel(new GridLayout(0, 1, 0, 6));
         botones.setOpaque(false);
+        contenedorBotonAst.setOpaque(false);
+        contenedorBotonGuardarAst.setOpaque(false);
+        actualizarBotonAst(null);
+
         botones.add(boton("Nuevo Archivo", "Nuevo (Ctrl+N)", Tema.CIAN, this::nuevaPestana));
         botones.add(boton("Abrir Archivo", "Abrir (Ctrl+O)", Tema.CIAN, this::abrirArchivo));
         botones.add(boton("Cargar Ejemplo", "Carga el programa de referencia", Tema.LIMA, this::cargarEjemplo));
         botones.add(boton("Generar AFD", "Genera y abre la imagen del AFD", Tema.VIOLETA, this::verAFD));
+        botones.add(contenedorBotonAst);
+        botones.add(contenedorBotonGuardarAst);
         botones.add(boton("Cerrar Todo", "Cierra todas las pestañas", Tema.AMBAR, this::cerrarTodo));
         botones.add(boton("Salir", "Cerrar el programa", Tema.MAGENTA, this::salir));
 
@@ -461,10 +492,12 @@ public class VentanaPrincipal extends JFrame {
         PestanaEditor pestana = new PestanaEditor(contenido, ruta, fondo, compilador::tokenizar);
         JLabel titulo = new JLabel();
         titulos.put(pestana, titulo);
+        pestana.setAlCambiarEstado(() -> actualizarTitulo(pestana));
         pestana.setAlEditarTexto(() -> {
             pintarPestana(pestana, null);
             MarcadorErrores.limpiar(pestana);
         });
+        
         pestana.setAlEditarTexto(() -> pintarPestana(pestana, null));
         pestana.addCaretListener(e -> {
             if (pestana == getPestanaActual()) actualizarCursor(pestana);
@@ -628,7 +661,7 @@ public class VentanaPrincipal extends JFrame {
         guardar(getPestanaActual());
     }
 
-    private boolean guardar(PestanaEditor pestana) {
+        private boolean guardar(PestanaEditor pestana) {
         if (pestana == null) {
             mensaje("No hay ningún archivo abierto para guardar.");
             return false;
@@ -648,20 +681,10 @@ public class VentanaPrincipal extends JFrame {
             recordarDirectorio(chooser);
             ruta = conExtension(chooser.getSelectedFile().toPath(), ".pz");
             if (!confirmarSobrescribir(ruta)) return false;
-        } else {
-            if (JOptionPane.showConfirmDialog(this,
-                    "¿Desea guardar los cambios en '" + ruta.getFileName() + "'?",
-                    "Guardar cambios", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
-                return false;
-            }
         }
         if (!escribir(ruta, pestana.getTexto())) return false;
         pestana.marcarGuardado(ruta);
         etiquetaEstado.setText(" Guardado: " + ruta.getFileName());
-        JOptionPane.showMessageDialog(this,
-                "Cambios guardados exitosamente en '" + ruta.getFileName() + "'.",
-                "Guardar cambios", JOptionPane.INFORMATION_MESSAGE);
         return true;
     }
 
@@ -691,7 +714,7 @@ public class VentanaPrincipal extends JFrame {
         chooser.addChoosableFileFilter(markdown);
         chooser.addChoosableFileFilter(texto);
         chooser.setFileFilter(markdown);
-        chooser.setSelectedFile(new File("promptzal_" + sufijo + ".md"));
+        chooser.setSelectedFile(new File("promptzal_" + sufijo));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
         recordarDirectorio(chooser);
 
@@ -748,6 +771,7 @@ public class VentanaPrincipal extends JFrame {
 
     private void mostrarSalida(Salida salida) {
         PestanaEditor actual = getPestanaActual();
+        actualizarBotonAst(salida);
         if (salida == null) {
             MarcadorErrores.limpiar(actual);
             limpiarPaneles();
@@ -896,6 +920,11 @@ public class VentanaPrincipal extends JFrame {
                             + mensajeDe(ex.getCause());
                 }
                 if (salidas.get(getPestanaActual()) == salida) mostrarAst(salida);
+                
+                if (salidas.get(getPestanaActual()) == salida) {
+                    mostrarAst(salida);
+                    actualizarBotonAst(salida);
+                }
             }
         }.execute();
     }
@@ -1074,5 +1103,96 @@ public class VentanaPrincipal extends JFrame {
             contador++;
         }
         return candidata;
+    }
+    
+    private void actualizarBotonAst(Salida salida) {
+        boolean listo = salida != null && salida.imagenAst != null;
+
+        Color colorVer = listo ? Tema.LIMA : Color.GRAY;
+        String ayudaVer = listo
+                ? "Genera y abre la imagen del AST de este archivo"
+                : "Compila este archivo primero para habilitar el AST";
+        botonAstActual = boton("Generar AST", ayudaVer, colorVer, this::verAST);
+        botonAstActual.setEnabled(listo);
+        if (!listo) {
+            botonAstActual.setForeground(Color.GRAY);
+        }
+        contenedorBotonAst.removeAll();
+        contenedorBotonAst.add(botonAstActual, BorderLayout.CENTER);
+        contenedorBotonAst.revalidate();
+        contenedorBotonAst.repaint();
+
+        Color colorGuardar = listo ? Tema.CIAN : Color.GRAY;
+        String ayudaGuardar = listo
+                ? "Guarda la imagen PNG del AST de este archivo"
+                : "Compila este archivo primero para poder guardar su AST";
+        botonGuardarAstActual = boton("Guardar AST", ayudaGuardar, colorGuardar, this::guardarAstImagen);
+        botonGuardarAstActual.setEnabled(listo);
+        if (!listo) {
+            botonGuardarAstActual.setForeground(Color.GRAY);
+        }
+        contenedorBotonGuardarAst.removeAll();
+        contenedorBotonGuardarAst.add(botonGuardarAstActual, BorderLayout.CENTER);
+        contenedorBotonGuardarAst.revalidate();
+        contenedorBotonGuardarAst.repaint();
+    }
+    
+    //guardar el ast
+    private void guardarAstImagen() {
+        PestanaEditor actual = getPestanaActual();
+        Salida salida = salidas.get(actual);
+        if (salida == null || salida.imagenAst == null) {
+            mensaje("Primero debes compilar este archivo para guardar su AST.");
+            return;
+        }
+        String sufijo = sufijoUnico(actual);
+        FileNameExtensionFilter filtroPng = new FileNameExtensionFilter("Imagen PNG (*.png)", "png");
+        JFileChooser chooser = selector();
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.addChoosableFileFilter(filtroPng);
+        chooser.setFileFilter(filtroPng);
+        chooser.setSelectedFile(new File("ast_" + sufijo + ".png"));
+        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        recordarDirectorio(chooser);
+
+        Path rutaPng = asegurarNoSobrescribir(conExtension(chooser.getSelectedFile().toPath(), ".png"));
+        try {
+            ImageIO.write(salida.imagenAst, "png", rutaPng.toFile());
+            etiquetaEstado.setText(" Imagen AST guardada: " + rutaPng.getFileName());
+            JOptionPane.showMessageDialog(this,
+                    "Imagen del AST guardada exitosamente en:\n" + rutaPng.toAbsolutePath(),
+                    "Guardar AST", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            mensaje("No se pudo guardar la imagen del AST: " + ex.getMessage());
+        }
+    }
+
+    private void verAST() {
+        PestanaEditor actual = getPestanaActual();
+        Salida salida = salidas.get(actual);
+        if (salida == null || salida.imagenAst == null) {
+            mensaje("Primero debes compilar este archivo para generar su AST.");
+            return;
+        }
+        try {
+            if (salida.rutaImagenAst == null || !Files.exists(salida.rutaImagenAst)) {
+                Path carpeta = Path.of("reportes");
+                Files.createDirectories(carpeta);
+                String sufijo = sufijoUnico(actual);
+                Path dot = asegurarNoSobrescribir(carpeta.resolve("ast_" + sufijo + ".dot"));
+                Path png = asegurarNoSobrescribir(carpeta.resolve("ast_" + sufijo + ".png"));
+                new MostrarGraphviz().compilarImagen(
+                        new GeneradorDotAst().generarCodigo(salida.resultado.getPrograma()), dot, png);
+                salida.rutaImagenAst = png;
+            }
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(salida.rutaImagenAst.toFile());
+            }
+            etiquetaEstado.setText(" Imagen del AST abierta: " + salida.rutaImagenAst.toAbsolutePath());
+        } catch (IOException ex) {
+            mensaje("No se pudo generar o abrir el AST:\n" + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
