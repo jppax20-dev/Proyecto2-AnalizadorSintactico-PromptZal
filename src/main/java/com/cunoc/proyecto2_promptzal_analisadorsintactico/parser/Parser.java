@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.parser;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.errores.ErrorCompilacion;
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer.Token;
@@ -23,10 +19,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-/**
- *
- * @author jppax
- */
+
 public class Parser {
     
     private static final Set<TipoToken> SINCRONIZACION = EnumSet.of(

@@ -26,6 +26,7 @@ public class GeneradorPromptzal {
         Set<String> escritos = new HashSet<>();
         for (Referencia ejecucion : programa.getEjecuciones()) {
             Agente agente = buscarAgente(programa, ejecucion.getNombre());
+            // Evita imprimir el mismo agente mas de una vez
             if (agente != null && escritos.add(ejecucion.getNombre())) {
                 bloqueAgente(agente, sb);
             }
@@ -90,6 +91,7 @@ public class GeneradorPromptzal {
         Expresion como = conector(c, "COMO");
         String guarda = "el resultado";
         String base;
+        // Convierte el comando exacto a una frase comun
         switch (c.getNombre()) {
             case "PREGUNTAR":
                 base = sobre == null ? "Responde: " + x
@@ -120,6 +122,7 @@ public class GeneradorPromptzal {
                 base = desde == null ? "Extrae " + x
                         : "Extrae " + x + " a partir de " + texto(desde);
                 break;
+                // Frase generica por si agregas un comando nuevo despues
             default:
                 base = instruccionGenerica(c, x);
         }
@@ -165,7 +168,8 @@ public class GeneradorPromptzal {
         if (termino instanceof TerminoCargar carga) return "el contenido del archivo \"" + carga.getArchivo() + "\"";
         return "";
     }
-
+    
+    //dos metodos origen porque uno recibe una expresion completa y uno un termino individual y define su formato de texto
     private String origen(Expresion expresion) {
         List<String> partes = new ArrayList<>();
         for (Termino t : expresion.getTerminos()) {
@@ -176,6 +180,7 @@ public class GeneradorPromptzal {
 
     private String origen(Termino termino) {
         if (termino instanceof TerminoCadena cadena) return "\"" + cadena.getValor() + "\"";
+        // Pide explicitamente a la ia que lea el documento
         if (termino instanceof TerminoCargar carga) {
             return "contenido del archivo \"" + carga.getArchivo() + "\" (adjuntar el archivo)";
         }

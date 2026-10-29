@@ -1,21 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.ast;
 import java.util.List;
-/**
- *
- * @author jppax
- */
+
+// Nodo principal que agrupa todas las partes del documento
 public class Programa {
     
+    // Listas que guardan las cuatro secciones del archivo original
     private final List<Directiva> directivas;
     private final List<Agente> agentes;
     private final List<Referencia> ejecuciones;
     private final List<Referencia> exportaciones;
     
-    public Programa(List<Directiva> directivas, List<Agente> agentes, List<Referencia> ejecuciones, List<Referencia> exportaciones){
+    public Programa(List<Directiva> directivas, List<Agente> agentes, List<Referencia> ejecuciones, 
+            List<Referencia> exportaciones){
         this.directivas = directivas;
         this.agentes = agentes;
         this.ejecuciones = ejecuciones;

@@ -5,9 +5,36 @@
     <artifactId>Proyecto2_PromptZal_AnalisadorSintactico</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <exec.mainClass>com.cunoc.proyecto2_promptzal_analisadorsintactico.Proyecto2_PromptZal_AnalisadorSintactico</exec.mainClass>
+        <exec.mainClass>com.cunoc.proyecto2_promptzal_analisadorsintactico.vista.VentanaPrincipal</exec.mainClass>
     </properties>
+
+    <build>
+        <finalName>PromptZal</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${exec.mainClass}</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

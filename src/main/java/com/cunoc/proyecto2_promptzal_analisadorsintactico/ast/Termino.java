@@ -1,21 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.ast;
 
-/**
- *
- * @author jppax
- */
+// Plantilla base para todos los valores manejados en el ast
 public abstract class Termino {
     
     private final int fila;
     
-    protected Termino(int fila){
-        this.fila = fila;
-    }
-    public int getFila() {
-        return fila;
-    }
+    protected Termino(int fila){ this.fila = fila;}
+    // Guarda la linea exacta para ubicar los errores semanticos
+    public int getFila() { return fila;}
 }

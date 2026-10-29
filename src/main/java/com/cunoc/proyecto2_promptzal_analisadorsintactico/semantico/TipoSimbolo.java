@@ -1,5 +1,6 @@
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico;
 
+// Define las unicas tres categorias permitidas en la memoria
 public enum TipoSimbolo {
     AGENTE("Agente"),
     VARIABLE_DECLARADA("Variable declarada"),

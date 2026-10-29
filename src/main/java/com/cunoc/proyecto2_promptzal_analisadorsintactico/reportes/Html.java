@@ -26,7 +26,7 @@ final class Html {
             }
             header {
               padding: 28px 24px 22px;
-              border-bottom: 1px solid var(--cian);
+              border-bottom: 1px solid var(--cian);GUAR
               box-shadow: 0 6px 24px rgba(0, 229, 255, 0.18);
               background: linear-gradient(90deg, rgba(0, 229, 255, 0.08), rgba(255, 61, 154, 0.08));
             }

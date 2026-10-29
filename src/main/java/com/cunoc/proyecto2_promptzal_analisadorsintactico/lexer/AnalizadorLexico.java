@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.lexer;
 
 import com.cunoc.proyecto2_promptzal_analisadorsintactico.errores.ErrorCompilacion;
@@ -16,11 +12,13 @@ public class AnalizadorLexico {
     private final List<ErrorCompilacion> errores = new ArrayList<>();
 
     public void analizar(String texto) {
+        // Vacia las listas por si el usuario compila un texto nuevo
         tokens.clear();
         errores.clear();
         Lexer lexer = new Lexer(new StringReader(texto), errores);
         try {
             Token token;
+            // Extrae todas las piezas de texto hasta detectar el final del archivo
             do {
                 token = lexer.yylex();
                 tokens.add(token);

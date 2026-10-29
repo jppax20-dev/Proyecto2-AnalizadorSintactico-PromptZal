@@ -11,7 +11,7 @@ public class GeneradorDotAst {
         return "n" + (contador++);
     }
 
-    // AQUI ESTA LA CLAVE: El método debe llamarse generarCodigo y retornar String
+    // El método debe llamarse generarCodigo y retornar String
     public String generarCodigo(Programa programa) {
         contador = 0;
         StringBuilder dot = new StringBuilder();

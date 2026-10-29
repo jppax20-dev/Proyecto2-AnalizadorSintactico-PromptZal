@@ -111,7 +111,8 @@ public class ReporteAst {
         sb.append("<section class=\"bloque total\">\n<h2>Árbol de sintaxis abstracta</h2>\n");
         sb.append("<div class=\"arbol-caja\"><div class=\"arbol\">\n<ul>\n<li>")
                 .append(nodo("raiz", "Programa", null)).append("\n<ul>\n");
-
+        
+        // Dibuja la rama de configuracion inicial si el usuario declaro directivas
         if (!programa.getDirectivas().isEmpty()) {
             sb.append("<li>").append(nodo("grupo", "Directivas", null)).append("\n<ul>\n");
             for (Directiva d : programa.getDirectivas()) {
@@ -153,6 +154,7 @@ public class ReporteAst {
     private void agente(StringBuilder sb, Agente a) {
         String nombre = a.getNombre() == null ? "(sin nombre)" : a.getNombre();
         sb.append("<li>").append(nodo("agente", "Agente", nombre, linea(a.getFila())));
+        // Revisa si el agente esta vacio o tiene instrucciones adentro para dibujar sus ramas
         boolean hijos = a.getContexto() != null || !a.getVariables().isEmpty() || !a.getComandos().isEmpty();
         if (hijos) {
             sb.append("\n<ul>\n");
@@ -175,6 +177,7 @@ public class ReporteAst {
 
     private void comando(StringBuilder sb, Comando c) {
         sb.append("<li>").append(nodo("comando", c.getNombre(), null, linea(c.getFila()))).append("\n<ul>\n");
+        // Dibuja el parametro principal que todo comando debe tener por obligacion
         sb.append("<li>").append(nodo("parte", "Argumento", null)).append("\n<ul>\n");
         expresion(sb, c.getArgumento());
         sb.append("</ul></li>\n");
@@ -190,6 +193,7 @@ public class ReporteAst {
 
     private void expresion(StringBuilder sb, Expresion e) {
         List<Termino> terminos = e.getTerminos();
+        // Si hay varias piezas unidas por el signo mas agrupa todas bajo un mismo nodo
         if (terminos.size() > 1) {
             sb.append("<li>").append(nodo("parte", "Concatenación (+)", null)).append("\n<ul>\n");
             for (Termino t : terminos) {

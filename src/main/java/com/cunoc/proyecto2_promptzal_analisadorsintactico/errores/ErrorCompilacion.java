@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.errores;
 
 
 public class ErrorCompilacion {
 
+    // Categorias para identificar en que fase del compilador fallo el texto
     public enum Tipo { LEXICO, SINTACTICO, SEMANTICO }
 
     private final Tipo tipo;
@@ -16,6 +13,7 @@ public class ErrorCompilacion {
     private final String encontrado;
     private final String esperado;
 
+    // Constructor bloqueado para obligar al programa a usar los metodos estaticos de abajo
     private ErrorCompilacion(Tipo tipo, String descripcion, int fila, int columna,
                              String encontrado, String esperado) {
         this.tipo = tipo;
@@ -30,6 +28,7 @@ public class ErrorCompilacion {
         return new ErrorCompilacion(Tipo.LEXICO, descripcion, fila, columna, null, null);
     }
 
+    // Construye un error de escritura armando el mensaje explicativo de forma automatica
     public static ErrorCompilacion sintactico(String encontrado, String esperado, int fila, int columna) {
         String descripcion = "Se encontró " + encontrado + " y se esperaba " + esperado;
         return new ErrorCompilacion(Tipo.SINTACTICO, descripcion, fila, columna, encontrado, esperado);

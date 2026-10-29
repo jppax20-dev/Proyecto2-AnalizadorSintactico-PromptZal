@@ -18,14 +18,17 @@ public class Compilador {
         AnalizadorLexico lexico = new AnalizadorLexico();
         lexico.analizar(texto);
 
+        // Junta los errores de escritura iniciales con los que se encuentren despues
         List<ErrorCompilacion> errores = new ArrayList<>(lexico.getErrores());
         Programa programa = new Parser(lexico.getTokens(), errores).parsear();
         TablaSimbolos tabla = new AnalizadorSemantico(errores).analizar(programa);
         String promptzal = new GeneradorPromptzal().generar(programa);
         
+        // Ordena los fallos de arriba hacia abajo segun el numero de linea y columna
         errores.sort(Comparator.comparingInt(ErrorCompilacion::getFila)
         .thenComparingInt(ErrorCompilacion::getColumna));
 
+        // Empaqueta todo el trabajo finalizado para mandarlo a la ventana visual
         return new ResultadoCompilacion(lexico.getTokens(), errores, programa, tabla, promptzal);
     }
     

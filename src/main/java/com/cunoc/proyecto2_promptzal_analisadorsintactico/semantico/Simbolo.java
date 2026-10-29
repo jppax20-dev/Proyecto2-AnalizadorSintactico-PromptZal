@@ -1,17 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cunoc.proyecto2_promptzal_analisadorsintactico.semantico;
 
-/**
- *
- * @author jppax
- */
 public class Simbolo {
     
     private final String nombre;
     private final TipoSimbolo tipo;
+    // Define a que agente pertenece para evitar choques de nombres
     private final String ambito;
     private final int fila;
     
