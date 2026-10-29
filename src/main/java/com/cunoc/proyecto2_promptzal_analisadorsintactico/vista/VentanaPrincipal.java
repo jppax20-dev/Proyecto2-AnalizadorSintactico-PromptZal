@@ -75,10 +75,12 @@ import javax.swing.tree.TreePath;
 
 public class VentanaPrincipal extends JFrame {
 
+    // aplica el tema oscuro al iniciar
     static {
         Tema.aplicar();
     }
 
+    // textos fijos y codigo de ejemplo
     private static final String TITULO_VENTANA = "PromptZal IDE";
     private static final String TEXTO_AST_VACIO = "Compila este archivo para ver su AST";
     private static final FileNameExtensionFilter FILTRO_PZ =
@@ -100,6 +102,7 @@ public class VentanaPrincipal extends JFrame {
             EXPORTAR resumen
             """;
 
+    // guarda los resultados de compilar cada pestana por separado
     private static final class Salida {
         private final ResultadoCompilacion resultado;
         private final int totalLineas;
@@ -184,6 +187,7 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
+    // crea las columnas de una tabla sin permitir que el usuario edite las celdas
     private DefaultTableModel crearModelo(String... columnas) {
         return new DefaultTableModel(columnas, 0) {
             @Override
@@ -193,6 +197,7 @@ public class VentanaPrincipal extends JFrame {
         };
     }
 
+    // acomoda todos los paneles botones y tablas dentro de la ventana
     private void construir() {
         configurarTablas();
         configurarEsquema();
@@ -312,6 +317,7 @@ public class VentanaPrincipal extends JFrame {
         };
     }
 
+    // da estilo al arbol lateral y salta a la linea al hacer doble clic
     private void configurarEsquema() {
         arbolEsquema.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         arbolEsquema.setRowHeight(20);
@@ -382,6 +388,7 @@ public class VentanaPrincipal extends JFrame {
         barra.setBackground(Tema.PANEL_CLARO);
         barra.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Tema.BORDE));
         barra.add(boton("Guardar", "Guardar (Ctrl+S)", Tema.CIAN, this::guardarArchivo));
+        barra.add(boton("Limpiar", "Limpiar el contenido del archivo actual", Tema.MAGENTA, this::limpiarArchivoActual));
         barra.add(Box.createHorizontalStrut(12));
         barra.add(boton("Compilar", "Compilar (F5)", Tema.VERDE, this::analizarCodigo));
         barra.add(boton("Copiar promptzal", "Copiar el promptzal al portapapeles", Tema.LIMA, this::copiarPrompt));
@@ -392,6 +399,8 @@ public class VentanaPrincipal extends JFrame {
         return barra;
     }
 
+    
+    // crea el panel izquierdo con los botones de archivos y el arbol del programa
     private JTabbedPane panelExplorador() {
         JPanel botones = new JPanel(new GridLayout(0, 1, 0, 6));
         botones.setOpaque(false);
@@ -888,6 +897,8 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
+    
+    // crea la imagen del ast con graphviz en segundo plano para no trabar la ventana
     private void generarImagenAst(Salida salida) {
         mostrarAst(salida);
         new SwingWorker<BufferedImage, Void>() {
@@ -1166,7 +1177,8 @@ public class VentanaPrincipal extends JFrame {
             mensaje("No se pudo guardar la imagen del AST: " + ex.getMessage());
         }
     }
-
+    
+    // guarda la imagen del ast en la carpeta de reportes y la abre en el visor de la computadora
     private void verAST() {
         PestanaEditor actual = getPestanaActual();
         Salida salida = salidas.get(actual);
@@ -1194,5 +1206,31 @@ public class VentanaPrincipal extends JFrame {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
+    }
+    
+    //metodo del boton limpiar 
+    private void limpiarArchivoActual() {
+        PestanaEditor pestana = getPestanaActual();
+        if (pestana == null) {
+            mensaje("No hay ningún archivo abierto para limpiar.");
+            return;
+        }
+        if (pestana.getTexto().isEmpty()) {
+            mensaje("El editor actual ya está vacío.");
+            return;
+        }
+        if (JOptionPane.showConfirmDialog(this,
+                "¿Estás seguro que quieres limpiar todo el contenido de '" + pestana.getNombre() + "'?",
+                "Confirmar limpieza", JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) {
+            return;
+        }
+        pestana.getEditor().setText("");
+        MarcadorErrores.limpiar(pestana);
+        salidas.remove(pestana);
+        pintarPestana(pestana, null);
+        mostrarSalida(null);
+        etiquetaEstado.setText(" Contenido limpiado: " + pestana.getNombre());
+        pestana.getEditor().requestFocusInWindow();
     }
 }
